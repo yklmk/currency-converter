@@ -4,13 +4,14 @@ import { ReactNode } from "react"
 import { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { MotionConfig } from "framer-motion"
 import { ThemeProvider } from "next-themes"
-import { SkeletonTheme } from "react-loading-skeleton"
 
 import "react-loading-skeleton/dist/skeleton.css"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
+import { SkeletonTheme } from "@/components/ui/adaptive-skeleton-theme"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 
 export const metadata: Metadata = {
@@ -77,20 +78,22 @@ export default function RootLayout({ children }: RootLayoutProps) {
             geistMono.variable
           )}
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <SkeletonTheme
-              baseColor="hsl(var(--skeleton-bg))"
-              highlightColor="hsl(var(--skeleton-highlight))"
-            >
-              <div
-                vaul-drawer-wrapper=""
-                className="bg-muted relative flex min-h-dvh flex-col rounded-md"
+          <MotionConfig reducedMotion="user">
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <SkeletonTheme
+                baseColor="hsl(var(--skeleton-bg))"
+                highlightColor="hsl(var(--skeleton-highlight))"
               >
-                <div className="flex-1">{children}</div>
-              </div>
-              <TailwindIndicator />
-            </SkeletonTheme>
-          </ThemeProvider>
+                <div
+                  vaul-drawer-wrapper=""
+                  className="bg-muted relative flex min-h-dvh flex-col rounded-md"
+                >
+                  <div className="flex-1">{children}</div>
+                </div>
+                <TailwindIndicator />
+              </SkeletonTheme>
+            </ThemeProvider>
+          </MotionConfig>
           <Analytics />
         </body>
       </html>
