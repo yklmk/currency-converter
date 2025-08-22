@@ -1,10 +1,8 @@
 const currencies = [
-  { currencyCode: "USD", currencyName: "US Dollar", countryCode: "US" },
-  { currencyCode: "EUR", currencyName: "Euro", countryCode: "EU" },
   {
-    currencyCode: "PLN",
-    currencyName: "Polish Złoty",
-    countryCode: "PL",
+    currencyCode: "AED",
+    currencyName: "UAE Dirham",
+    countryCode: "AE",
   },
   {
     currencyCode: "BYN",
@@ -12,19 +10,9 @@ const currencies = [
     countryCode: "BY",
   },
   {
-    currencyCode: "CZK",
-    currencyName: "Czech Koruna",
-    countryCode: "CZ",
-  },
-  {
-    currencyCode: "GBP",
-    currencyName: "British Pound",
-    countryCode: "GB",
-  },
-  {
-    currencyCode: "AED",
-    currencyName: "UAE Dirham",
-    countryCode: "AE",
+    currencyCode: "CHF",
+    currencyName: "Swiss Franc",
+    countryCode: "CH",
   },
   {
     currencyCode: "CNY",
@@ -32,9 +20,29 @@ const currencies = [
     countryCode: "CN",
   },
   {
+    currencyCode: "CZK",
+    currencyName: "Czech Koruna",
+    countryCode: "CZ",
+  },
+  {
+    currencyCode: "DKK",
+    currencyName: "Danish Krone",
+    countryCode: "DK",
+  },
+  {
     currencyCode: "EGP",
     currencyName: "Egyptian Pound",
     countryCode: "EG",
+  },
+  {
+    currencyCode: "EUR",
+    currencyName: "Euro",
+    countryCode: "EU",
+  },
+  {
+    currencyCode: "GBP",
+    currencyName: "British Pound",
+    countryCode: "GB",
   },
   {
     currencyCode: "JPY",
@@ -42,19 +50,19 @@ const currencies = [
     countryCode: "JP",
   },
   {
+    currencyCode: "NOK",
+    currencyName: "Norwegian Krone",
+    countryCode: "NO",
+  },
+  {
+    currencyCode: "PLN",
+    currencyName: "Polish Złoty",
+    countryCode: "PL",
+  },
+  {
     currencyCode: "RUB",
     currencyName: "Russian Ruble",
     countryCode: "RU",
-  },
-  {
-    currencyCode: "UAH",
-    currencyName: "Ukrainian Hryvnia",
-    countryCode: "UA",
-  },
-  {
-    currencyCode: "TRY",
-    currencyName: "Turkish Lira",
-    countryCode: "TR",
   },
   {
     currencyCode: "SEK",
@@ -62,16 +70,20 @@ const currencies = [
     countryCode: "SE",
   },
   {
-    currencyCode: "NOK",
-    currencyName: "Norwegian Krone",
-    countryCode: "NO",
+    currencyCode: "TRY",
+    currencyName: "Turkish Lira",
+    countryCode: "TR",
   },
   {
-    currencyCode: "DKK",
-    currencyName: "Danish Krone",
-    countryCode: "DK",
+    currencyCode: "UAH",
+    currencyName: "Ukrainian Hryvnia",
+    countryCode: "UA",
   },
-  { currencyCode: "CHF", currencyName: "Swiss Franc", countryCode: "CH" },
+  {
+    currencyCode: "USD",
+    currencyName: "US Dollar",
+    countryCode: "US",
+  },
 ] as const
 
 export default currencies

@@ -43,10 +43,10 @@ export default function CurrencySelectModal({
   const closeModal = () => onOpenChange(false)
 
   const sortedCurrencies = currencies.sort((a, b) => {
-    if (a.countryCode < b.currencyCode) {
+    if (a.currencyName < b.currencyName) {
       return -1
     }
-    if (a.currencyCode > b.currencyCode) {
+    if (a.currencyName > b.currencyName) {
       return 1
     }
     return 0
