@@ -93,6 +93,7 @@ const DraggableInput: FC<DraggableInputProps> = ({
         <Button
           ref={deleteButtonRef}
           tabIndex={isDragged ? 0 : -1}
+          aria-label="Remove currency"
           variant="destructive"
           className="absolute right-[-60px] h-[66px] rounded-lg"
           onClick={onRemoveClick}
