@@ -12,6 +12,7 @@ import "react-loading-skeleton/dist/skeleton.css"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { SkeletonTheme } from "@/components/ui/adaptive-skeleton-theme"
+import { SWRProvider } from "@/components/swr-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 
 export const metadata: Metadata = {
@@ -107,7 +108,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   vaul-drawer-wrapper=""
                   className="bg-muted relative flex min-h-dvh flex-col rounded-md"
                 >
-                  <div className="flex-1">{children}</div>
+                  <div className="flex-1">
+                    <SWRProvider>{children}</SWRProvider>
+                  </div>
                 </div>
                 <TailwindIndicator />
               </SkeletonTheme>

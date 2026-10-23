@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
 import { AnimatePresence, Reorder } from "framer-motion"
 import Skeleton from "react-loading-skeleton"
@@ -8,6 +8,7 @@ import { useIsClient, useLocalStorage } from "usehooks-ts"
 
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
 import { Settings } from "@/types/settings"
+import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
@@ -19,6 +20,7 @@ import { Input } from "./input"
 
 interface ConverterProps {
   rates: Rate
+  updatedAt: string
 }
 
 const defaultCurrencies: Currency[] = [
@@ -41,8 +43,45 @@ const defaultCurrencies: Currency[] = [
 
 const MAX_LENGTH = 10
 
-export default function Converter({ rates }: ConverterProps) {
+type LastInput = {
+  currencyCode: CurrencyCode
+  value: string
+}
+
+const convert = (rates: Rate, { currencyCode, value }: LastInput): Rate => {
+  const convertedCurrencies = Object.keys(rates)
+    .filter((key) => key !== currencyCode)
+    .reduce((acc, key) => {
+      const convertedValue =
+        (Number(value) / rates[currencyCode]) * rates[key as keyof Rate]
+
+      const formattedValue = convertedValue.toFixed(2).toString()
+
+      let trimmedValue =
+        formattedValue.length > MAX_LENGTH
+          ? formattedValue.slice(0, MAX_LENGTH)
+          : formattedValue
+
+      if (trimmedValue.endsWith(".")) {
+        trimmedValue = trimmedValue.slice(0, -1)
+      }
+
+      return { ...acc, [key]: trimmedValue }
+    }, {} as Rate)
+
+  return { ...convertedCurrencies, [currencyCode]: value ? value : "" }
+}
+
+export default function Converter({
+  rates: serverRates,
+  updatedAt,
+}: ConverterProps) {
   const isClient = useIsClient()
+  const serverSnapshot = useMemo(
+    () => ({ rates: serverRates, updatedAt }),
+    [serverRates, updatedAt]
+  )
+  const { rates } = useRates(serverSnapshot)
 
   const [state, setState] = useState<Rate>({} as Rate)
   const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
@@ -62,6 +101,7 @@ export default function Converter({ rates }: ConverterProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
   const settingsButtonRef = useRef<HTMLButtonElement | null>(null)
+  const lastInputRef = useRef<LastInput | null>(null)
 
   const availableCurrencies = supportedCurrencies.filter((currency) => {
     return !currencies.some(
@@ -69,36 +109,17 @@ export default function Converter({ rates }: ConverterProps) {
     )
   })
 
+  // When rates are refreshed in the background, recalculate from the last
+  // entered value instead of resetting the inputs.
   useEffect(() => {
-    setState(rates)
+    setState(
+      lastInputRef.current ? convert(rates, lastInputRef.current) : rates
+    )
   }, [rates])
 
   const convertCurrencies = (currencyCode: CurrencyCode, value: string) => {
-    setState({ ...state, [currencyCode]: value ? value : "" })
-
-    const filteredCurrencies = Object.keys(state).filter(
-      (key) => key !== currencyCode
-    )
-
-    const convertedCurrencies = filteredCurrencies.reduce((acc, key) => {
-      const convertedValue =
-        (Number(value) / rates[currencyCode]) * rates[key as keyof Rate]
-
-      const formattedValue = convertedValue.toFixed(2).toString()
-
-      let trimmedValue =
-        formattedValue.length > MAX_LENGTH
-          ? formattedValue.slice(0, MAX_LENGTH)
-          : formattedValue
-
-      if (trimmedValue.endsWith(".")) {
-        trimmedValue = trimmedValue.slice(0, -1)
-      }
-
-      return { ...acc, [key]: trimmedValue }
-    }, {})
-
-    setState((prev) => ({ ...prev, ...convertedCurrencies }))
+    lastInputRef.current = { currencyCode, value }
+    setState(convert(rates, lastInputRef.current))
   }
 
   const onSelectCurrency = (currency: Currency) => {
