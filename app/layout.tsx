@@ -116,7 +116,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               </SkeletonTheme>
             </ThemeProvider>
           </MotionConfig>
-          <Analytics />
+          {process.env.NODE_ENV === "production" && <Analytics />}
         </body>
       </html>
     </>
