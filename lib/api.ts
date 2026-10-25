@@ -3,8 +3,7 @@ import currencies from "@/helpers/currencies"
 import { Rate, RatesData, RatesResponse } from "@/types/currency"
 import ratesFixture from "@/lib/fixtures/rates.json"
 
-// Free currencyapi plan: 300 requests/month, rates are updated once a day.
-// 6h revalidation is ~120 requests/month, the rest is left for builds.
+// How often the server refreshes rates from currencyapi, in seconds (6 hours).
 export const RATES_REVALIDATE = 21600
 export const RATES_TAG = "rates"
 

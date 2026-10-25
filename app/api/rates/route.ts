@@ -1,6 +1,7 @@
 import { fetchRates } from "@/lib/api"
 
-// Must be a literal, keep in sync with RATES_REVALIDATE.
+// Serve the response statically and regenerate it every 21600 seconds (6 hours),
+// same as RATES_REVALIDATE.
 export const revalidate = 21600
 
 export async function GET() {

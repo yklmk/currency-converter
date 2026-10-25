@@ -1,6 +1,6 @@
 import ConverterWidget from "@/app/components/converter-widget"
 
-// Must be a literal, keep in sync with RATES_REVALIDATE.
+// Regenerate the page every 21600 seconds (6 hours), same as RATES_REVALIDATE.
 export const revalidate = 21600
 
 export default async function IndexPage() {
