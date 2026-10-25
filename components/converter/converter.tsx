@@ -17,6 +17,7 @@ import SettingsModal from "@/components/settings-modal"
 
 import Container from "./container"
 import { Input } from "./input"
+import { RatesStatus } from "./rates-status"
 
 interface ConverterProps {
   rates: Rate
@@ -81,7 +82,12 @@ export default function Converter({
     () => ({ rates: serverRates, updatedAt }),
     [serverRates, updatedAt]
   )
-  const { rates } = useRates(serverSnapshot)
+  const {
+    rates,
+    updatedAt: ratesUpdatedAt,
+    isStale: isRatesStale,
+    isValidating: isRatesUpdating,
+  } = useRates(serverSnapshot)
 
   const [state, setState] = useState<Rate>({} as Rate)
   const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
@@ -213,9 +219,17 @@ export default function Converter({
         </div>
 
         <div className="flex flex-col px-3 pb-10 pt-4 sm:mx-auto sm:w-[70%]">
-          <h2 className="pb-5 pl-1 text-3xl font-bold leading-tight tracking-tighter">
+          <h2 className="pb-2 pl-1 text-3xl font-bold leading-tight tracking-tighter">
             Converter
           </h2>
+
+          {isClient && (
+            <RatesStatus
+              updatedAt={ratesUpdatedAt}
+              isStale={isRatesStale}
+              isUpdating={isRatesUpdating}
+            />
+          )}
 
           <div ref={listRef}>
             {!isClient ? (
