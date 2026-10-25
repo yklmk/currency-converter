@@ -13,6 +13,10 @@ coverage
 out/
 build
 
+# serwist
+public/sw*
+public/swe-worker*
+
 # misc
 .DS_Store
 *.pem

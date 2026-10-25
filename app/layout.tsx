@@ -12,6 +12,7 @@ import "react-loading-skeleton/dist/skeleton.css"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { SkeletonTheme } from "@/components/ui/adaptive-skeleton-theme"
+import { ServiceWorkerUpdater } from "@/components/service-worker-updater"
 import { SWRProvider } from "@/components/swr-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 
@@ -117,6 +118,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </ThemeProvider>
           </MotionConfig>
           {process.env.NODE_ENV === "production" && <Analytics />}
+          <ServiceWorkerUpdater />
         </body>
       </html>
     </>
