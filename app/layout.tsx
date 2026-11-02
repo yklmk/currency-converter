@@ -94,7 +94,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <html lang="en" suppressHydrationWarning>
         <body
           className={cn(
-            "bg-muted min-h-dvh font-sans antialiased transition-colors duration-300",
+            "min-h-dvh bg-muted font-sans antialiased transition-colors duration-300",
             geist.variable,
             geistMono.variable
           )}
@@ -107,7 +107,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               >
                 <div
                   vaul-drawer-wrapper=""
-                  className="bg-muted relative flex min-h-dvh flex-col rounded-md"
+                  className="relative flex min-h-dvh flex-col rounded-md bg-muted"
                 >
                   <div className="flex-1">
                     <SWRProvider>{children}</SWRProvider>

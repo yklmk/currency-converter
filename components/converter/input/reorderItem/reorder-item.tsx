@@ -50,7 +50,7 @@ const ReorderItem = <T,>({
             size="icon"
             variant="ghost"
             className={
-              "text-border hover:text-ring absolute right-1 z-0 size-6 h-full cursor-grab touch-none transition-colors hover:bg-transparent"
+              "absolute right-1 z-0 size-6 h-full cursor-grab touch-none text-border transition-colors hover:bg-transparent hover:text-ring"
             }
             onPointerDown={(e) => {
               e.currentTarget.style.cursor = "grabbing"

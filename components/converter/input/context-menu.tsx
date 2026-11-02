@@ -45,7 +45,7 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
         </ContextMenuItem>
         <ContextMenuItem
           disabled={isDeleteDisabled}
-          className="text-destructive focus:text-destructive cursor-pointer select-none gap-5 p-3 text-sm md:px-2 md:py-1.5"
+          className="cursor-pointer select-none gap-5 p-3 text-sm text-destructive focus:text-destructive md:px-2 md:py-1.5"
           onClick={onDeleteClick}
         >
           <span className="flex w-full items-center gap-2">

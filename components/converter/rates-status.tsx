@@ -30,7 +30,7 @@ export function RatesStatus({
   // Fresh rates are on their way, don't alarm the user with the outdated date.
   if (isOnline && isUpdating) {
     return (
-      <div role="status" className="text-muted-foreground pl-2">
+      <div role="status" className="pl-2 text-muted-foreground">
         <Indicator state="default" loading>
           Updating rates…
         </Indicator>
@@ -39,7 +39,7 @@ export function RatesStatus({
   }
 
   return (
-    <div role="status" className="text-muted-foreground pl-2">
+    <div role="status" className="pl-2 text-muted-foreground">
       <Indicator state={isStale ? "error" : "warning"}>
         {isOnline ? `Rates from ${date}` : `Offline · rates from ${date}`}
       </Indicator>

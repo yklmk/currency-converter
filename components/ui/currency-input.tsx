@@ -80,7 +80,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     <div
       onClick={focusInput}
       className={cn(
-        "bg-background focus-within:ring-ring ring-offset-background flex w-full cursor-pointer select-none items-center justify-between rounded-lg border p-4 transition-shadow focus-within:ring-2 focus-within:ring-offset-2",
+        "flex w-full cursor-pointer select-none items-center justify-between rounded-lg border bg-background p-4 ring-offset-background transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         containerClassName
       )}
     >
@@ -90,7 +90,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
           <span className="text-nowrap pb-1 text-base leading-3">
             {currency.currencyName}
           </span>
-          <span className="text-ring text-sm leading-3">
+          <span className="text-sm leading-3 text-ring">
             {currency.currencyCode}
           </span>
         </div>
