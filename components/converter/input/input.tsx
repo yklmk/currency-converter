@@ -1,4 +1,4 @@
-import { MotionProps } from "framer-motion"
+import { MotionProps } from "motion/react"
 
 import { DraggableInput, DraggableInputProps } from "./draggable-input"
 import { ReorderItem, ReorderItemProps } from "./reorderItem"

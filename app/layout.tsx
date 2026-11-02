@@ -4,7 +4,7 @@ import { ReactNode } from "react"
 import { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { MotionConfig } from "framer-motion"
+import { MotionConfig } from "motion/react"
 import { ThemeProvider } from "next-themes"
 
 import "react-loading-skeleton/dist/skeleton.css"

@@ -1,5 +1,5 @@
 import { FC, KeyboardEventHandler, RefObject, useEffect, useRef } from "react"
-import { motion, MotionProps, PanInfo } from "framer-motion"
+import { motion, MotionProps, PanInfo } from "motion/react"
 import { useOnClickOutside } from "usehooks-ts"
 
 import { Currency, CurrencyCode } from "@/types/currency"

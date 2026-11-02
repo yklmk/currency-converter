@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
-import { AnimatePresence, Reorder } from "framer-motion"
+import { AnimatePresence, Reorder } from "motion/react"
 import Skeleton from "react-loading-skeleton"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
 

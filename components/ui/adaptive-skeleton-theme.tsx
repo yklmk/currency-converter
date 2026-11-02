@@ -1,7 +1,7 @@
 "use client"
 
 import { PropsWithChildren } from "react"
-import { useReducedMotion } from "framer-motion"
+import { useReducedMotion } from "motion/react"
 import { SkeletonTheme as SkeletonThemeBase } from "react-loading-skeleton"
 
 type SkeletonThemeProps = PropsWithChildren<{

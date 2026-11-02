@@ -5,7 +5,7 @@ import {
   motion,
   Reorder,
   useDragControls,
-} from "framer-motion"
+} from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
