@@ -1,7 +1,6 @@
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { FlatCompat } from "@eslint/eslintrc"
-import typescriptParser from "@typescript-eslint/parser"
 import prettierConfig from "eslint-config-prettier/flat"
 import prettierPlugin from "eslint-plugin-prettier"
 import tailwind from "eslint-plugin-tailwindcss"
@@ -32,12 +31,6 @@ const config = [
     },
     rules: {
       "prettier/prettier": "warn",
-    },
-  },
-  {
-    files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: {
-      parser: typescriptParser,
     },
   },
 ]
