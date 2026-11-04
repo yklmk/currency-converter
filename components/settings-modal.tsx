@@ -148,8 +148,6 @@ export default function SettingsModal({
   })
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  const closeModal = () => onOpenChange(false)
-
   const onFlagSetChange = (flagSet: FlagSetsType) => {
     setSettings({ ...settings, flagSet })
   }
@@ -157,10 +155,9 @@ export default function SettingsModal({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent onEscapeKeyDown={closeModal} className="max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
-            <DialogClose aria-label="Close" onClick={closeModal} />
           </DialogHeader>
 
           <Label className="flex items-center justify-between">
@@ -180,9 +177,9 @@ export default function SettingsModal({
           </Label>
 
           <DialogFooter>
-            <Button aria-label="Close" onClick={closeModal}>
-              Close
-            </Button>
+            <DialogClose asChild>
+              <Button aria-label="Close">Close</Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -194,7 +191,6 @@ export default function SettingsModal({
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{TITLE}</DrawerTitle>
-          <DrawerClose aria-label="Close" onClick={closeModal} />
         </DrawerHeader>
 
         <div className="p-4 pb-3">
@@ -218,9 +214,9 @@ export default function SettingsModal({
         </div>
 
         <DrawerFooter>
-          <Button aria-label="Close" onClick={closeModal}>
-            Close
-          </Button>
+          <DrawerClose asChild>
+            <Button aria-label="Close">Close</Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

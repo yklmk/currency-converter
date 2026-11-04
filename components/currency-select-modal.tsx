@@ -40,8 +40,6 @@ export default function CurrencySelectModal({
 }: CurrencySelectModalProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  const closeModal = () => onOpenChange(false)
-
   const sortedCurrencies = currencies.sort((a, b) => {
     if (a.currencyName < b.currencyName) {
       return -1
@@ -55,7 +53,7 @@ export default function CurrencySelectModal({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent onEscapeKeyDown={closeModal} className="max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
             <DialogDescription>{DESCRIPTION}</DialogDescription>
