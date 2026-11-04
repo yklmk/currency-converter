@@ -80,14 +80,14 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     <div
       onClick={focusInput}
       className={cn(
-        "flex w-full cursor-pointer select-none items-center justify-between rounded-lg border bg-background p-4 ring-offset-background transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "flex w-full cursor-pointer items-center justify-between rounded-lg border bg-background p-4 ring-offset-background transition-shadow select-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         containerClassName
       )}
     >
       <div className="mr-1 flex shrink-0">
         <Flag flagSet={flagSet} countryCode={currency.countryCode} size={32} />
         <div className="ml-3 flex flex-col justify-center">
-          <span className="text-nowrap pb-1 text-base leading-3">
+          <span className="pb-1 text-base leading-3 text-nowrap">
             {currency.currencyName}
           </span>
           <span className="text-sm leading-3 text-ring">
@@ -99,7 +99,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
       <Input
         ref={inputRef}
         value={value}
-        className="size-auto min-w-3 max-w-[40%] shrink text-ellipsis rounded-none border-none p-0 text-right text-base tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="size-auto max-w-[40%] min-w-3 shrink rounded-none border-none p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
         inputMode="decimal"
         placeholder="0"
         aria-label={`${currency.currencyCode} currency input`}

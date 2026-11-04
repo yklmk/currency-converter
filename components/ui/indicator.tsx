@@ -33,7 +33,7 @@ export function Indicator({
         <FadeArc
           role="presentation"
           aria-hidden
-          className="mr-2 size-3 motion-reduce:!animate-none"
+          className="mr-2 size-3 motion-reduce:animate-none!"
         />
       ) : (
         <div className={`mr-2 size-2.5 rounded-full ${color}`} />

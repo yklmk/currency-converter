@@ -14,7 +14,7 @@ const config = [
     ignores: [".next/**", "dist/**", ".cache/**", "public/**", "**/*.esm.js"],
   },
   ...compat.extends("next/core-web-vitals"),
-  ...tailwind.configs["flat/recommended"],
+  tailwind.configs.recommended,
   prettierConfig,
   {
     plugins: {
@@ -22,8 +22,7 @@ const config = [
     },
     settings: {
       tailwindcss: {
-        callees: ["cn"],
-        config: join(rootDir, "tailwind.config.ts"),
+        cssConfigPath: join(rootDir, "styles/globals.css"),
       },
       next: {
         rootDir: ["./"],

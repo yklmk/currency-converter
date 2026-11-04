@@ -218,8 +218,8 @@ export default function Converter({
           )}
         </div>
 
-        <div className="flex flex-col px-3 pb-10 pt-4 sm:mx-auto sm:w-[70%]">
-          <h2 className="pb-2 pl-1 text-3xl font-bold leading-tight tracking-tighter">
+        <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
+          <h2 className="pb-2 pl-1 text-3xl leading-tight font-bold tracking-tighter">
             Converter
           </h2>
 

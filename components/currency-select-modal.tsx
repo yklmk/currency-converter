@@ -62,7 +62,7 @@ export default function CurrencySelectModal({
           </DialogHeader>
 
           <CurrenciesList
-            className="max-h-[280px]"
+            className="max-h-70"
             currencies={sortedCurrencies}
             onSelectCurrency={setCurrency}
           />

@@ -39,7 +39,7 @@ const ReorderItem = <T,>({
       initial="initial"
       animate="visible"
       exit="hidden"
-      className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:!mb-0"
+      className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:mb-0!"
       role="listitem"
     >
       {children}
