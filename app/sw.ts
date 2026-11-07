@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { defaultCache } from "@serwist/next/worker"
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist"
-import { NetworkFirst, Serwist } from "serwist"
+import { NetworkFirst, NetworkOnly, Serwist } from "serwist"
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -28,6 +28,13 @@ const serwist = new Serwist({
         cacheName: PAGES_CACHE,
         networkTimeoutSeconds: 3,
       }),
+    },
+    {
+      // Rates are never cached here: SWR keeps the last ones in localStorage
+      // for offline use. A cached copy would hide that the request failed.
+      matcher: ({ url, sameOrigin }) =>
+        sameOrigin && url.pathname === "/api/rates",
+      handler: new NetworkOnly(),
     },
     ...defaultCache,
   ],

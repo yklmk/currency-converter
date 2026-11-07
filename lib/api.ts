@@ -44,9 +44,10 @@ export const fetchRates = async (): Promise<RatesData> => {
   // Throwing keeps the last successful version in the cache instead of
   // caching empty rates from a 429/500 response.
   if (!response.ok) {
-    throw new Error(
-      `currencyapi request failed: ${response.status} ${response.statusText}`
+    console.error(
+      `[rates] currencyapi failed: ${response.status} ${await response.text()}`
     )
+    throw new Error(`currencyapi request failed: ${response.status}`)
   }
 
   const ratesResponse = (await response.json()) as RatesResponse
@@ -55,8 +56,10 @@ export const fetchRates = async (): Promise<RatesData> => {
   const remaining = response.headers.get("x-ratelimit-remaining-quota-month")
   const remainingQuota = (Number(remaining) / Number(quota)) * 100
 
+  // updatedAt shows when currencyapi publishes new rates: the first log
+  // with a new date tells the time.
   console.info(
-    `[rates] refreshed, quota remaining: ${remaining}/${quota} (${remainingQuota.toFixed(0)}%)`
+    `[rates] refreshed, rates from ${ratesResponse.meta.last_updated_at}, quota remaining: ${remaining}/${quota} (${remainingQuota.toFixed(0)}%)`
   )
 
   return {
