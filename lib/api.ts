@@ -2,10 +2,16 @@ import currencies from "@/helpers/currencies"
 
 import { Rate, RatesData, RatesResponse } from "@/types/currency"
 import ratesFixture from "@/lib/fixtures/rates.json"
+import { createLogger, highlight } from "@/lib/log"
 
 // How often the server refreshes rates from currencyapi, in seconds (6 hours).
 export const RATES_REVALIDATE = 21600
 export const RATES_TAG = "rates"
+
+// Below this share of the monthly quota left, in percent, refreshes warn.
+const LOW_QUOTA = 20
+
+const log = createLogger("rates")
 
 // Dev servers use the fixture to save the API quota. Set RATES_FIXTURE=1
 // to use it elsewhere (local `pnpm preview`, Vercel Preview env).
@@ -44,8 +50,8 @@ export const fetchRates = async (): Promise<RatesData> => {
   // Throwing keeps the last successful version in the cache instead of
   // caching empty rates from a 429/500 response.
   if (!response.ok) {
-    console.error(
-      `[rates] currencyapi failed: ${response.status} ${await response.text()}`
+    log.error(
+      `currencyapi responded ${response.status}: ${await response.text()}`
     )
     throw new Error(`currencyapi request failed: ${response.status}`)
   }
@@ -58,9 +64,13 @@ export const fetchRates = async (): Promise<RatesData> => {
 
   // updatedAt shows when currencyapi publishes new rates: the first log
   // with a new date tells the time.
-  console.info(
-    `[rates] refreshed, rates from ${ratesResponse.meta.last_updated_at}, quota remaining: ${remaining}/${quota} (${remainingQuota.toFixed(0)}%)`
+  log.success(
+    `refreshed, rates from ${highlight(ratesResponse.meta.last_updated_at)}, ${remaining} of ${quota} requests left this month`
   )
+
+  if (remainingQuota < LOW_QUOTA) {
+    log.warn(`only ${remaining} of ${quota} requests left this month`)
+  }
 
   return {
     rates: normalizeRates(ratesResponse),
