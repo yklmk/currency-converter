@@ -10,19 +10,17 @@ import Bowser from "bowser"
 
 import { Currency } from "@/types/currency"
 import { cn } from "@/lib/utils"
-import { Flag, FlagSetsType } from "@/components/ui/flag"
+import { Flag } from "@/components/ui/flag"
 import { Input } from "@/components/ui/input"
 
 interface CurrencyInputProps extends InputHTMLAttributes<HTMLInputElement> {
   currency: Currency
-  flagSet: FlagSetsType
   containerClassName?: string
   onRemoveShortcut?: (currency: Currency) => void
 }
 
 const CurrencyInput: FC<CurrencyInputProps> = ({
   currency,
-  flagSet,
   containerClassName,
   value,
   onChange,
@@ -85,7 +83,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
       )}
     >
       <div className="mr-1 flex shrink-0">
-        <Flag flagSet={flagSet} countryCode={currency.countryCode} size={32} />
+        <Flag countryCode={currency.countryCode} size={32} />
         <div className="ml-3 flex flex-col justify-center">
           <span className="pb-1 text-base leading-3 text-nowrap">
             {currency.currencyName}

@@ -8,7 +8,6 @@ import { Skeleton } from "skullet/react"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
 
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
-import { Settings } from "@/types/settings"
 import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import { InputContextMenu } from "@/components/converter/input"
@@ -18,13 +17,6 @@ import SettingsModal from "@/components/settings-modal"
 import Container from "./container"
 import { Input } from "./input"
 import { RatesStatus } from "./rates-status"
-
-const DEFAULT_SETTINGS: Settings = { flagSet: "colorful" }
-
-interface ListData {
-  currencies: Currency[]
-  flagSet: Settings["flagSet"]
-}
 
 interface ConverterProps {
   rates: Rate
@@ -99,11 +91,6 @@ export default function Converter({
   const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
     "currencies",
     defaultCurrencies
-  )
-  const [settings] = useLocalStorage<Settings>("settings", DEFAULT_SETTINGS)
-  const listData = useMemo<ListData | null>(
-    () => (isClient ? { currencies, flagSet: settings.flagSet } : null),
-    [isClient, currencies, settings.flagSet]
   )
   const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
     null
@@ -241,38 +228,36 @@ export default function Converter({
             <Skeleton
               id="currencies"
               label="Loading currencies"
-              data={listData}
-              sample={{
-                currencies: defaultCurrencies,
-                flagSet: DEFAULT_SETTINGS.flagSet,
-              }}
+              // The server can't read localStorage, so until the page is
+              // hydrated the list is a skeleton drawn from the defaults.
+              data={isClient ? currencies : null}
+              sample={defaultCurrencies}
             >
               {(list) => (
                 <Reorder.Group
                   layoutScroll
                   axis="y"
-                  values={list.currencies}
+                  values={list}
                   className="relative flex flex-col"
                   role="list"
                   onReorder={setCurrencies}
                 >
                   <AnimatePresence initial={false} mode="sync">
-                    {list.currencies.map((currency) => (
+                    {list.map((currency) => (
                       <InputContextMenu
                         key={currency.currencyCode}
                         disabled={isEditModeEnabled}
-                        isDeleteDisabled={list.currencies.length <= 2}
+                        isDeleteDisabled={list.length <= 2}
                         onEditModeClick={onEnableEditMode}
                         onDeleteClick={() => onRemoveCurrency(currency)}
                       >
                         <Input
                           showControls={isEditModeEnabled}
-                          flagSet={list.flagSet}
                           currency={currency}
                           value={state[currency.currencyCode] || ""}
                           maxLength={MAX_LENGTH}
                           dragConstraints={listRef}
-                          draggable={list.currencies.length > 2}
+                          draggable={list.length > 2}
                           isDragged={currency.currencyCode === draggedCurrency}
                           setIsDragged={setIsDragged}
                           onChange={(event) =>
