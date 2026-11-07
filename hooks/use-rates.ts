@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import useSWR, { useSWRConfig } from "swr"
 
 import { Rate } from "@/types/currency"
@@ -17,20 +17,9 @@ const RATES_KEY = "/api/rates"
 // asking for it on every tab switch.
 const REFRESH_INTERVAL = 10 * 60 * 1000
 
-// Age after which rates are considered outdated, in milliseconds (48 hours).
-// currencyapi updates rates once a day and the server refreshes them every 6h,
-// so rates up to ~30h old are normal.
-const STALE_AFTER = 48 * 60 * 60 * 1000
-
-// How many times to ask again when the server answers with an outdated
-// response it is regenerating (count, not time).
-const STALE_RETRIES = 2
-
-// Delay before the first retry, in milliseconds (2 seconds). Doubles on every
-// retry: 2s, then 4s.
-const STALE_RETRY_DELAY = 2 * 1000
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+// Failed requests are retried a few times before the error is shown.
+const RETRY_INTERVAL = 3 * 1000
+const RETRY_COUNT = 3
 
 const isValid = (snapshot?: RatesSnapshot): snapshot is RatesSnapshot =>
   Boolean(snapshot?.rates && snapshot.updatedAt)
@@ -40,39 +29,56 @@ const isNewer = (a: RatesSnapshot, b?: RatesSnapshot) =>
 
 // The server answers "STALE" when it served the previous version of /api/rates
 // and is regenerating it in the background: x-vercel-cache on Vercel,
-// x-nextjs-cache with `next start`. The fresh version is ready a moment later,
-// so ask again instead of keeping the outdated rates until the next refresh.
+// x-nextjs-cache with `next start`. Neither tells when regeneration fails,
+// the server just keeps serving the last good version.
 const isRegenerating = (response: Response) =>
   (response.headers.get("x-vercel-cache") ??
     response.headers.get("x-nextjs-cache")) === "STALE"
 
+// Without a network fetch itself throws a TypeError. A STALE response is
+// treated as a failed one, so SWR asks again until the fresh rates are ready.
 const fetcher = async (url: string): Promise<RatesSnapshot> => {
-  for (let attempt = 0; ; attempt++) {
-    const response = await fetch(url)
+  const response = await fetch(url)
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch rates: ${response.status}`)
-    }
-
-    if (!isRegenerating(response) || attempt === STALE_RETRIES) {
-      return response.json()
-    }
-
-    await wait(STALE_RETRY_DELAY * 2 ** attempt)
+  if (!response.ok) {
+    const error = new Error(`Failed to fetch rates: ${response.status}`)
+    // error.info = await response.json()
+    // error.status = response.status
+    throw error
   }
+
+  if (isRegenerating(response)) {
+    throw new Error("Rates are being regenerated")
+  }
+
+  return response.json()
 }
 
 // Rates live in the SWR cache, which is persisted to localStorage (see
 // SWRProvider), so the last known rates are available offline. SWR refreshes
 // them on focus and when the network is back.
-export function useRates(
-  initial: RatesSnapshot
-): RatesSnapshot & { isStale: boolean; isValidating: boolean } {
+export function useRates(initial: RatesSnapshot): RatesSnapshot & {
+  // The last request failed and all its retries too. Kept until a request
+  // succeeds.
+  error: Error | undefined
+} {
   const { cache } = useSWRConfig()
-  const { data, mutate, isValidating } = useSWR(RATES_KEY, fetcher, {
+  // SWR keeps the error while it retries, this tells when it gave up.
+  const [hasGivenUp, setHasGivenUp] = useState(false)
+  const { data, error, mutate } = useSWR(RATES_KEY, fetcher, {
     fallbackData: initial,
     dedupingInterval: REFRESH_INTERVAL,
     focusThrottleInterval: REFRESH_INTERVAL,
+    // SWR calls it only in a visible tab with a network.
+    onErrorRetry: (_error, _key, _config, revalidate, { retryCount }) => {
+      if (retryCount > RETRY_COUNT) {
+        setHasGivenUp(true)
+        return
+      }
+
+      setTimeout(() => revalidate({ retryCount }), RETRY_INTERVAL)
+    },
+    onSuccess: () => setHasGivenUp(false),
   })
 
   // The server-rendered rates can be newer than the persisted ones, e.g. after
@@ -84,7 +90,6 @@ export function useRates(
   }, [cache, initial, mutate])
 
   const snapshot = isNewer(initial, data) ? initial : data
-  const isStale = Date.now() - Date.parse(snapshot.updatedAt) > STALE_AFTER
 
-  return { ...snapshot, isStale, isValidating }
+  return { ...snapshot, error: hasGivenUp ? error : undefined }
 }

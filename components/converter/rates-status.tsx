@@ -1,48 +1,49 @@
-import { useOnlineStatus } from "@/hooks/use-online-status"
-import { Indicator } from "@/components/ui/indicator"
+"use client"
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
-  month: "short",
-  day: "numeric",
+import { TriangleExclamationPoint } from "lucide-react"
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
 })
 
-interface RatesStatusProps {
-  updatedAt: string
-  isStale: boolean
-  isUpdating: boolean
+const dayFormat = new Intl.DateTimeFormat("en-GB", {
+  month: "short",
+  day: "numeric",
+})
+
+// The time for today's rates and the day for older ones.
+function formatUpdatedAt(updatedAt: string) {
+  const date = new Date(updatedAt)
+  const isToday = date.toDateString() === new Date().toDateString()
+  return isToday ? timeFormat.format(date) : dayFormat.format(date)
 }
 
-export function RatesStatus({
-  updatedAt,
-  isStale,
-  isUpdating,
-}: RatesStatusProps) {
-  const isOnline = useOnlineStatus()
+interface RatesStatusProps {
+  updatedAt: string
+  // Kept only after all retries failed.
+  error: Error | undefined
+}
 
-  if (isOnline && !isStale) {
-    return null
-  }
-
-  const date = dateFormat.format(new Date(updatedAt))
-
-  // Fresh rates are on their way, don't alarm the user with the outdated date.
-  if (isOnline && isUpdating) {
-    return (
-      <div role="status" className="pl-2 text-muted-foreground">
-        <Indicator state="default" loading>
-          Updating rates…
-        </Indicator>
-      </div>
-    )
-  }
+// Sits at the end of the heading line: one line of text, no taller than the
+// heading, so showing it never moves the inputs. Shown when the server couldn't
+// refresh the rates. Without a network fetch throws a TypeError: that says
+// nothing about the rates, so it isn't shown.
+export function RatesStatus({ updatedAt, error }: RatesStatusProps) {
+  const isShown = Boolean(error) && !(error instanceof TypeError)
 
   return (
-    <div role="status" className="pl-2 text-muted-foreground">
-      <Indicator state={isStale ? "error" : "warning"}>
-        {isOnline ? `Rates from ${date}` : `Offline · rates from ${date}`}
-      </Indicator>
+    // The live region stays mounted, so screen readers announce every change.
+    <div
+      role="status"
+      className="mb-px flex h-4 min-w-0 flex-1 items-center justify-end gap-2 text-xs/4 font-medium whitespace-nowrap text-muted-foreground"
+    >
+      {isShown && (
+        <>
+          <TriangleExclamationPoint className="size-3.5 shrink-0 text-error" />
+          Rates from {formatUpdatedAt(updatedAt)}
+        </>
+      )}
     </div>
   )
 }

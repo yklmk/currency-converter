@@ -85,8 +85,7 @@ export default function Converter({
   const {
     rates,
     updatedAt: ratesUpdatedAt,
-    isStale: isRatesStale,
-    isValidating: isRatesUpdating,
+    error: ratesError,
   } = useRates(serverSnapshot)
 
   const [state, setState] = useState<Rate>({} as Rate)
@@ -219,17 +218,15 @@ export default function Converter({
         </div>
 
         <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
-          <h2 className="pb-2 pl-1 text-3xl leading-tight font-bold tracking-tighter">
-            Converter
-          </h2>
+          <div className="flex items-end justify-between gap-3 px-1 pb-2">
+            <h2 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
+              Converter
+            </h2>
 
-          {isClient && (
-            <RatesStatus
-              updatedAt={ratesUpdatedAt}
-              isStale={isRatesStale}
-              isUpdating={isRatesUpdating}
-            />
-          )}
+            {isClient && (
+              <RatesStatus updatedAt={ratesUpdatedAt} error={ratesError} />
+            )}
+          </div>
 
           <div ref={listRef}>
             {!isClient ? (

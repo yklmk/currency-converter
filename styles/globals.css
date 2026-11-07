@@ -39,9 +39,7 @@
 
   --color-kbd: hsl(var(--kbd));
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --color-error: var(--color-red-400);
 }
 
 @layer base {
@@ -75,8 +73,6 @@
     --input: 240 5.9% 90%;
 
     --ring: 240 5% 64.9%;
-
-    --radius: 0.5rem;
 
     --kbd: 0 0% 88%;
 
