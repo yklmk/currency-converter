@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
+import { Check, Plus, SettingsIcon } from "lucide-react"
 import { AnimatePresence, Reorder } from "motion/react"
 import Skeleton from "react-loading-skeleton"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
@@ -12,7 +13,6 @@ import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
-import { Icons } from "@/components/icons"
 import SettingsModal from "@/components/settings-modal"
 
 import Container from "./container"
@@ -190,7 +190,7 @@ export default function Converter({
               aria-label="Settings"
               onClick={onOpenSettingsModal}
             >
-              <Icons.settings size={20} />
+              <SettingsIcon size={20} />
             </Button>
           </div>
           {isEditModeEnabled ? (
@@ -200,7 +200,7 @@ export default function Converter({
               aria-label="Done"
               onClick={onDisableEditMode}
             >
-              <Icons.check size={18} className="mr-1" />
+              <Check size={18} className="mr-1" />
               Done
             </Button>
           ) : (
@@ -212,7 +212,7 @@ export default function Converter({
               aria-label="Add currency"
               onClick={onOpenCurrenciesList}
             >
-              <Icons.plus size={18} className="mr-1" />
+              <Plus size={18} className="mr-1" />
               Add
             </Button>
           )}

@@ -1,5 +1,6 @@
 import { FC, MouseEventHandler, ReactNode } from "react"
 import Bowser from "bowser"
+import { ArrowUpDown, Trash } from "lucide-react"
 
 import {
   ContextMenu,
@@ -8,7 +9,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import KBD from "@/components/ui/KBD"
-import { Icons } from "@/components/icons"
 
 interface InputContextMenuProps {
   disabled: boolean
@@ -39,7 +39,7 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
           onClick={onEditModeClick}
         >
           <span className="flex w-full items-center gap-2">
-            <Icons.shuffle size={16} />
+            <ArrowUpDown size={16} />
             Reorder
           </span>
         </ContextMenuItem>
@@ -49,7 +49,7 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
           onClick={onDeleteClick}
         >
           <span className="flex w-full items-center gap-2">
-            <Icons.trash size={16} />
+            <Trash size={16} />
             Delete
           </span>
           {isDesktop ? (

@@ -1,4 +1,5 @@
 import { ReactNode, RefObject } from "react"
+import { GripVertical } from "lucide-react"
 import {
   AnimatePresence,
   DraggableProps,
@@ -8,7 +9,6 @@ import {
 } from "motion/react"
 
 import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
 
 import { buttonVariants, itemVariants } from "./variants"
 
@@ -64,7 +64,7 @@ const ReorderItem = <T,>({
               animate="visible"
               exit="hidden"
             >
-              <Icons.drag />
+              <GripVertical />
             </motion.button>
           </Button>
         )}

@@ -1,3 +1,4 @@
+import { Laptop, Moon, SunMedium } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useLocalStorage, useMediaQuery } from "usehooks-ts"
 
@@ -28,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Icons } from "@/components/icons"
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -39,15 +39,15 @@ const TITLE = "Settings"
 
 const options = {
   light: {
-    icon: <Icons.sun className="mr-2 size-4" />,
+    icon: <SunMedium className="mr-2 size-4" />,
     label: "Light",
   },
   dark: {
-    icon: <Icons.moon className="mr-2 size-4" />,
+    icon: <Moon className="mr-2 size-4" />,
     label: "Dark",
   },
   system: {
-    icon: <Icons.laptop className="mr-2 size-4" />,
+    icon: <Laptop className="mr-2 size-4" />,
     label: "System",
   },
 }

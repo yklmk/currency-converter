@@ -1,4 +1,5 @@
 import { FC, KeyboardEventHandler, RefObject, useEffect, useRef } from "react"
+import { Trash } from "lucide-react"
 import { motion, MotionProps, PanInfo } from "motion/react"
 import { useOnClickOutside } from "usehooks-ts"
 
@@ -8,7 +9,6 @@ import {
   CurrencyInput,
   CurrencyInputProps,
 } from "@/components/ui/currency-input"
-import { Icons } from "@/components/icons"
 
 interface DraggableInputProps extends CurrencyInputProps {
   draggable: boolean
@@ -99,7 +99,7 @@ const DraggableInput: FC<DraggableInputProps> = ({
           onClick={onRemoveClick}
           onKeyDown={handleDeleteButtonKeyDown}
         >
-          <Icons.trash />
+          <Trash />
         </Button>
       </motion.div>
     </motion.div>
