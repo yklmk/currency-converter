@@ -31,9 +31,6 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const osName = Bowser.getParser(window.navigator.userAgent).getOSName()
-  const isMac = osName === "macOS"
-
   const focusInput = () => {
     if (inputRef.current) {
       inputRef.current.focus()
@@ -63,6 +60,9 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (onRemoveShortcut) {
+      const osName = Bowser.getParser(window.navigator.userAgent).getOSName()
+      const isMac = osName === "macOS"
+
       if (
         (isMac &&
           event.key === "Backspace" &&
@@ -99,7 +99,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
       <Input
         ref={inputRef}
         value={value}
-        className="size-auto max-w-[40%] min-w-3 shrink rounded-none border-none p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="size-auto max-w-[40%] min-w-3 shrink rounded-md border-none p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
         inputMode="decimal"
         placeholder="0"
         aria-label={`${currency.currencyCode} currency input`}

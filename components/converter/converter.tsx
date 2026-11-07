@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
 import { Check, Plus, SettingsIcon } from "lucide-react"
 import { AnimatePresence, Reorder } from "motion/react"
-import Skeleton from "react-loading-skeleton"
+import { Skeleton } from "skullet/react"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
 
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
@@ -18,6 +18,13 @@ import SettingsModal from "@/components/settings-modal"
 import Container from "./container"
 import { Input } from "./input"
 import { RatesStatus } from "./rates-status"
+
+const DEFAULT_SETTINGS: Settings = { flagSet: "colorful" }
+
+interface ListData {
+  currencies: Currency[]
+  flagSet: Settings["flagSet"]
+}
 
 interface ConverterProps {
   rates: Rate
@@ -93,9 +100,11 @@ export default function Converter({
     "currencies",
     defaultCurrencies
   )
-  const [settings] = useLocalStorage<Settings>("settings", {
-    flagSet: "colorful",
-  })
+  const [settings] = useLocalStorage<Settings>("settings", DEFAULT_SETTINGS)
+  const listData = useMemo<ListData | null>(
+    () => (isClient ? { currencies, flagSet: settings.flagSet } : null),
+    [isClient, currencies, settings.flagSet]
+  )
   const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
     null
   )
@@ -229,57 +238,58 @@ export default function Converter({
           </div>
 
           <div ref={listRef}>
-            {!isClient ? (
-              <Skeleton
-                containerClassName="flex flex-col"
-                className="mb-4"
-                width={"100%"}
-                height={66}
-                count={4}
-                inline
-              />
-            ) : (
-              <Reorder.Group
-                layoutScroll
-                axis="y"
-                values={currencies}
-                className="relative flex flex-col"
-                role="list"
-                onReorder={setCurrencies}
-              >
-                <AnimatePresence initial={false} mode="sync">
-                  {currencies.map((currency) => (
-                    <InputContextMenu
-                      key={currency.currencyCode}
-                      disabled={isEditModeEnabled}
-                      isDeleteDisabled={currencies.length <= 2}
-                      onEditModeClick={onEnableEditMode}
-                      onDeleteClick={() => onRemoveCurrency(currency)}
-                    >
-                      <Input
-                        showControls={isEditModeEnabled}
-                        flagSet={settings.flagSet}
-                        currency={currency}
-                        value={state[currency.currencyCode] || ""}
-                        maxLength={MAX_LENGTH}
-                        dragConstraints={listRef}
-                        draggable={currencies.length > 2}
-                        isDragged={currency.currencyCode === draggedCurrency}
-                        setIsDragged={setIsDragged}
-                        onChange={(event) =>
-                          convertCurrencies(
-                            currency.currencyCode,
-                            event.target.value
-                          )
-                        }
-                        onRemove={onRemoveCurrency}
-                        onRemoveShortcut={onRemoveCurrency}
-                      />
-                    </InputContextMenu>
-                  ))}
-                </AnimatePresence>
-              </Reorder.Group>
-            )}
+            <Skeleton
+              id="currencies"
+              label="Loading currencies"
+              data={listData}
+              sample={{
+                currencies: defaultCurrencies,
+                flagSet: DEFAULT_SETTINGS.flagSet,
+              }}
+            >
+              {(list) => (
+                <Reorder.Group
+                  layoutScroll
+                  axis="y"
+                  values={list.currencies}
+                  className="relative flex flex-col"
+                  role="list"
+                  onReorder={setCurrencies}
+                >
+                  <AnimatePresence initial={false} mode="sync">
+                    {list.currencies.map((currency) => (
+                      <InputContextMenu
+                        key={currency.currencyCode}
+                        disabled={isEditModeEnabled}
+                        isDeleteDisabled={list.currencies.length <= 2}
+                        onEditModeClick={onEnableEditMode}
+                        onDeleteClick={() => onRemoveCurrency(currency)}
+                      >
+                        <Input
+                          showControls={isEditModeEnabled}
+                          flagSet={list.flagSet}
+                          currency={currency}
+                          value={state[currency.currencyCode] || ""}
+                          maxLength={MAX_LENGTH}
+                          dragConstraints={listRef}
+                          draggable={list.currencies.length > 2}
+                          isDragged={currency.currencyCode === draggedCurrency}
+                          setIsDragged={setIsDragged}
+                          onChange={(event) =>
+                            convertCurrencies(
+                              currency.currencyCode,
+                              event.target.value
+                            )
+                          }
+                          onRemove={onRemoveCurrency}
+                          onRemoveShortcut={onRemoveCurrency}
+                        />
+                      </InputContextMenu>
+                    ))}
+                  </AnimatePresence>
+                </Reorder.Group>
+              )}
+            </Skeleton>
           </div>
         </div>
       </Container>

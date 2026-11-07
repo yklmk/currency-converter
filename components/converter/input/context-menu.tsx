@@ -25,10 +25,14 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
   onDeleteClick,
   children,
 }) => {
-  const parser = Bowser.getParser(window.navigator.userAgent)
-  const isDesktop = parser.getPlatformType() === "desktop"
-  const osName = parser.getOSName()
-  const isMac = osName === "macOS"
+  // Rows are rendered on the server too, where there is no user agent. The menu
+  // content renders only once opened, so it never differs on hydration.
+  const parser =
+    typeof window === "undefined"
+      ? null
+      : Bowser.getParser(window.navigator.userAgent)
+  const isDesktop = parser?.getPlatformType() === "desktop"
+  const isMac = parser?.getOSName() === "macOS"
 
   return (
     <ContextMenu>

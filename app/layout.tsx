@@ -6,12 +6,10 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { MotionConfig } from "motion/react"
 import { ThemeProvider } from "next-themes"
-
-import "react-loading-skeleton/dist/skeleton.css"
+import { SkulletProvider } from "skullet/react"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
-import { SkeletonTheme } from "@/components/ui/adaptive-skeleton-theme"
 import { ServiceWorkerUpdater } from "@/components/service-worker-updater"
 import { SWRProvider } from "@/components/swr-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
@@ -101,10 +99,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <MotionConfig reducedMotion="user">
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-              <SkeletonTheme
-                baseColor="hsl(var(--skeleton-bg))"
-                highlightColor="hsl(var(--skeleton-highlight))"
-              >
+              <SkulletProvider>
                 <div
                   vaul-drawer-wrapper=""
                   className="relative flex min-h-dvh flex-col rounded-md bg-muted"
@@ -114,7 +109,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   </div>
                 </div>
                 <TailwindIndicator />
-              </SkeletonTheme>
+              </SkulletProvider>
             </ThemeProvider>
           </MotionConfig>
           {process.env.NODE_ENV === "production" && <Analytics />}

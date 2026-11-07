@@ -34,9 +34,6 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  --color-skeleton: hsl(var(--skeleton));
-  --color-skeleton-highlight: hsl(var(--skeleton-highlight));
-
   --color-kbd: hsl(var(--kbd));
 
   --color-error: var(--color-red-400);
@@ -76,8 +73,8 @@
 
     --kbd: 0 0% 88%;
 
-    --skeleton-bg: 0 0% 95%;
-    --skeleton-highlight: 0 0% 98%;
+    --skullet-base: rgb(0 0 0 / 0.07);
+    --skullet-highlight: rgb(255 255 255 / 0.6);
   }
 
   .dark {
@@ -113,8 +110,8 @@
 
     --kbd: 0 0% 32%;
 
-    --skeleton-bg: 0 0% 20%;
-    --skeleton-highlight: 0 0% 15%;
+    --skullet-base: rgb(255 255 255 / 0.08);
+    --skullet-highlight: rgb(255 255 255 / 0.1);
   }
 }
 
@@ -142,4 +139,17 @@
     margin: 0;
     -moz-appearance: textfield !important;
   }
+
+  /* skullet draws a skeleton's bars in a layer over the content it measures.
+     The currency rows raise their surface with z-index, which would cover the
+     bars, so the measured content gets its own stacking context. */
+  [skullet-ghost] {
+    isolation: isolate;
+  }
+}
+
+/* The skeleton's bar for an amount: about as wide as "1.00", not the whole
+   input. Outside @layer, so it wins over the input's size-auto utility. */
+[skullet-ghost] input {
+  width: 4ch;
 }

@@ -1,8 +1,6 @@
 import { useState } from "react"
 import Image from "next/image"
-import Skeleton from "react-loading-skeleton"
-
-import "react-loading-skeleton/dist/skeleton.css"
+import { SkeletonBox } from "skullet/react"
 
 import { cn } from "@/lib/utils"
 
@@ -36,12 +34,7 @@ export function Flag({
       style={{ width: `${size}px`, height: `${size}px` }}
     >
       {!isLoaded ? (
-        <Skeleton
-          circle
-          width={`${size}px`}
-          height={`${size}px`}
-          containerClassName={cn("flex items-center")}
-        />
+        <SkeletonBox width={size} height={size} radius="50%" />
       ) : null}
 
       {countryCode ? (
