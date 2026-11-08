@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
-import { Check, Plus, SettingsIcon } from "lucide-react"
+import { Check, Plus } from "lucide-react"
 import { AnimatePresence, Reorder } from "motion/react"
 import { Skeleton } from "skullet/react"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
@@ -12,7 +12,7 @@ import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
-import SettingsModal from "@/components/settings-modal"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 import Container from "./container"
 import { Input } from "./input"
@@ -96,12 +96,10 @@ export default function Converter({
     null
   )
   const [isCurrenciesListOpen, setIsCurrenciesListOpen] = useState(false)
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
 
   const listRef = useRef<HTMLDivElement>(null)
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const settingsButtonRef = useRef<HTMLButtonElement | null>(null)
   const lastInputRef = useRef<LastInput | null>(null)
 
   const availableCurrencies = supportedCurrencies.filter((currency) => {
@@ -130,7 +128,6 @@ export default function Converter({
   }
 
   const onOpenCurrenciesList = () => setIsCurrenciesListOpen(true)
-  const onOpenSettingsModal = () => setIsSettingsModalOpen(true)
   const onEnableEditMode = () => setIsEditModeEnabled(true)
   const onDisableEditMode = () => setIsEditModeEnabled(false)
 
@@ -162,31 +159,12 @@ export default function Converter({
     setIsCurrenciesListOpen(open)
   }
 
-  const onSettingsModalOpenChange = (open: boolean) => {
-    if (!open) {
-      setTimeout(() => {
-        settingsButtonRef.current?.focus()
-      }, 100)
-    }
-
-    setIsSettingsModalOpen(open)
-  }
-
   return (
     <>
       <Container>
         <div className="flex items-center justify-between border-b p-4">
           <div className="flex">
-            <Button
-              ref={settingsButtonRef}
-              size="icon"
-              variant="outline"
-              className="size-8"
-              aria-label="Settings"
-              onClick={onOpenSettingsModal}
-            >
-              <SettingsIcon size={20} />
-            </Button>
+            <ThemeToggle />
           </div>
           {isEditModeEnabled ? (
             <Button
@@ -284,11 +262,6 @@ export default function Converter({
         onOpenChange={onCurrencySelectModalOpenChange}
         currencies={availableCurrencies}
         setCurrency={onSelectCurrency}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onOpenChange={onSettingsModalOpenChange}
       />
     </>
   )
