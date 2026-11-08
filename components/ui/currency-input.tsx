@@ -1,9 +1,9 @@
 import {
   ChangeEventHandler,
   FC,
-  FocusEventHandler,
   InputHTMLAttributes,
   KeyboardEventHandler,
+  MouseEventHandler,
   useRef,
 } from "react"
 import Bowser from "bowser"
@@ -12,6 +12,17 @@ import { Currency } from "@/types/currency"
 import { cn } from "@/lib/utils"
 import { Flag } from "@/components/ui/flag"
 import { Input } from "@/components/ui/input"
+
+let isMacCache: boolean | undefined
+
+function isMac() {
+  if (isMacCache === undefined) {
+    isMacCache =
+      Bowser.getParser(window.navigator.userAgent).getOSName() === "macOS"
+  }
+
+  return isMacCache
+}
 
 interface CurrencyInputProps extends InputHTMLAttributes<HTMLInputElement> {
   currency: Currency
@@ -29,19 +40,21 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const focusInput = () => {
-    if (inputRef.current) {
-      inputRef.current.focus()
+  // A click on the field itself keeps the browser's caret. A click elsewhere
+  // on the card focuses the field with the caret at the end, where a label
+  // would leave it at the start.
+  const handleCardClick: MouseEventHandler<HTMLLabelElement> = (event) => {
+    const input = inputRef.current
+
+    if (!input || event.target === input) {
+      return
     }
-  }
 
-  const handleFocus: FocusEventHandler<HTMLInputElement> = (event) => {
-    const input = event.target
+    event.preventDefault()
+    input.focus()
 
-    setTimeout(() => {
-      const length = input.value.length
-      input.setSelectionRange(length, length)
-    }, 0)
+    const length = input.value.length
+    input.setSelectionRange(length, length)
   }
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -57,28 +70,23 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   }
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (onRemoveShortcut) {
-      const osName = Bowser.getParser(window.navigator.userAgent).getOSName()
-      const isMac = osName === "macOS"
+    if (!onRemoveShortcut || event.key !== "Backspace" || !event.shiftKey) {
+      return
+    }
 
-      if (
-        (isMac &&
-          event.key === "Backspace" &&
-          event.metaKey &&
-          event.shiftKey) ||
-        (!isMac && event.key === "Backspace" && event.ctrlKey && event.shiftKey)
-      ) {
-        event.preventDefault()
-        onRemoveShortcut(currency)
-      }
+    const modifier = isMac() ? event.metaKey : event.ctrlKey
+
+    if (modifier) {
+      event.preventDefault()
+      onRemoveShortcut(currency)
     }
   }
 
   return (
-    <div
-      onClick={focusInput}
+    <label
+      onClick={handleCardClick}
       className={cn(
-        "flex w-full cursor-pointer items-center justify-between rounded-lg border bg-background p-4 ring-offset-background transition-shadow select-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+        "flex w-full cursor-pointer items-center justify-between rounded-lg border bg-background p-4 transition-[border-color,box-shadow] select-none focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
         containerClassName
       )}
     >
@@ -97,16 +105,17 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
       <Input
         ref={inputRef}
         value={value}
-        className="size-auto max-w-[40%] min-w-3 shrink rounded-md border-none p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="size-auto max-w-[40%] min-w-3 shrink border-none bg-transparent p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
+        name={currency.currencyCode}
         inputMode="decimal"
+        autoComplete="off"
         placeholder="0"
         aria-label={`${currency.currencyCode} currency input`}
-        onFocus={handleFocus}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         {...props}
       />
-    </div>
+    </label>
   )
 }
 
