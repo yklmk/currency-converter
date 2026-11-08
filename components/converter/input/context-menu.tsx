@@ -39,23 +39,20 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
       <ContextMenuTrigger disabled={disabled}>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-40">
         <ContextMenuItem
-          className="cursor-pointer gap-2 p-3 text-sm select-none md:px-2 md:py-1.5"
+          className="cursor-pointer max-md:p-3"
           onClick={onEditModeClick}
         >
-          <span className="flex w-full items-center gap-2">
-            <ArrowUpDown size={16} />
-            Reorder
-          </span>
+          <ArrowUpDown />
+          Reorder
         </ContextMenuItem>
         <ContextMenuItem
+          variant="destructive"
           disabled={isDeleteDisabled}
-          className="cursor-pointer gap-5 p-3 text-sm text-destructive select-none focus:text-destructive md:px-2 md:py-1.5"
+          className="cursor-pointer max-md:p-3"
           onClick={onDeleteClick}
         >
-          <span className="flex w-full items-center gap-2">
-            <Trash size={16} />
-            Delete
-          </span>
+          <Trash />
+          Delete
           {isDesktop ? (
             <div className="ml-auto flex gap-1">
               <KBD>{isMac ? "⌘" : "CTRL"}</KBD>

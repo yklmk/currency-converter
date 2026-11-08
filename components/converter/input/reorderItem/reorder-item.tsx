@@ -51,7 +51,7 @@ const ReorderItem = <T,>({
             size="icon"
             variant="ghost"
             className={
-              "absolute right-1 z-0 size-6 h-full cursor-grab touch-none text-border transition-colors hover:bg-transparent hover:text-ring"
+              "absolute right-1 z-0 size-6 h-full cursor-grab touch-none text-border transition-colors hover:bg-transparent hover:text-ring dark:hover:bg-transparent"
             }
             onPointerDown={(e) => {
               e.currentTarget.style.cursor = "grabbing"
@@ -65,7 +65,7 @@ const ReorderItem = <T,>({
               animate="visible"
               exit="hidden"
             >
-              <GripVertical />
+              <GripVertical className="size-6" />
             </motion.button>
           </Button>
         )}

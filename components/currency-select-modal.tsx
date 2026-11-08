@@ -29,8 +29,8 @@ interface CurrencySelectModalProps {
   setCurrency: (currency: Currency) => void
 }
 
-const TITLE = "Select currency"
-const DESCRIPTION = "Choose the currency you want to use"
+const TITLE = "Select Currency"
+const DESCRIPTION = "Choose the currency you want to add"
 
 export default function CurrencySelectModal({
   isOpen,
@@ -53,7 +53,7 @@ export default function CurrencySelectModal({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
             <DialogDescription>{DESCRIPTION}</DialogDescription>
@@ -67,9 +67,7 @@ export default function CurrencySelectModal({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button aria-label="Cancel" variant="outline">
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -80,7 +78,7 @@ export default function CurrencySelectModal({
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
       <DrawerContent>
-        <DrawerHeader className="text-start">
+        <DrawerHeader>
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
         </DrawerHeader>
@@ -91,9 +89,9 @@ export default function CurrencySelectModal({
           onSelectCurrency={setCurrency}
         />
 
-        <DrawerFooter className="pb-10">
+        <DrawerFooter className="pb-[max(--spacing(10),env(safe-area-inset-bottom))]">
           <DrawerClose asChild>
-            <Button aria-label="Cancel">Cancel</Button>
+            <Button variant="outline">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
