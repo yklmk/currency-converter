@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect } from "react"
 import { Moon, SunMedium } from "lucide-react"
 import { AnimatePresence, motion, type Transition } from "motion/react"
 import { useTheme } from "next-themes"
 import { useIsClient } from "usehooks-ts"
 
+import { siteConfig } from "@/config/site"
 import { Button } from "@/components/ui/button"
 
 const iconTransition: Transition = { type: "spring", duration: 0.3, bounce: 0 }
@@ -26,6 +28,19 @@ export function ThemeToggle() {
   const isDark = resolvedTheme === "dark"
   const target = isDark ? "light" : "dark"
 
+  useEffect(() => {
+    if (!resolvedTheme) {
+      return
+    }
+
+    const color = isDark
+      ? siteConfig.themeColor.dark
+      : siteConfig.themeColor.light
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((meta) => meta.setAttribute("content", color))
+  }, [resolvedTheme, isDark])
+
   const onToggle = () => {
     setTheme(target === systemTheme ? "system" : target)
   }
@@ -34,15 +49,14 @@ export function ThemeToggle() {
     <Button
       size="icon"
       variant="outline"
-      className="size-8"
-      aria-label={`Switch to ${target} theme`}
+      aria-label={isClient ? `Switch to ${target} theme` : "Toggle theme"}
       onClick={onToggle}
     >
       <span className="grid *:col-start-1 *:row-start-1">
         <AnimatePresence initial={false}>
           {isClient && (
             <motion.span key={resolvedTheme} {...iconMotion}>
-              {isDark ? <Moon size={20} /> : <SunMedium size={20} />}
+              {isDark ? <Moon /> : <SunMedium />}
             </motion.span>
           )}
         </AnimatePresence>

@@ -64,8 +64,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f4f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#171717" },
+    {
+      media: "(prefers-color-scheme: light)",
+      color: siteConfig.themeColor.light,
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: siteConfig.themeColor.dark,
+    },
   ],
 }
 
@@ -113,11 +119,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
           )}
         >
           <MotionConfig reducedMotion="user">
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
               <SkulletProvider>
                 <div
                   vaul-drawer-wrapper=""
-                  className="relative flex min-h-dvh flex-col rounded-md bg-muted"
+                  className="relative flex min-h-dvh flex-col rounded-md bg-muted pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
                 >
                   <div className="flex-1">
                     <SWRProvider>{children}</SWRProvider>

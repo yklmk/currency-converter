@@ -162,30 +162,24 @@ export default function Converter({
   return (
     <>
       <Container>
-        <div className="flex items-center justify-between border-b p-4">
+        <div className="flex items-center justify-between border-b p-2">
           <div className="flex">
             <ThemeToggle />
           </div>
           {isEditModeEnabled ? (
-            <Button
-              variant="outline"
-              className="h-8 px-2"
-              aria-label="Done"
-              onClick={onDisableEditMode}
-            >
-              <Check size={18} className="mr-1" />
+            <Button variant="outline" onClick={onDisableEditMode}>
+              <Check />
               Done
             </Button>
           ) : (
             <Button
               ref={addButtonRef}
               variant="outline"
-              className="h-8 px-2"
               disabled={availableCurrencies.length === 0}
               aria-label="Add currency"
               onClick={onOpenCurrenciesList}
             >
-              <Plus size={18} className="mr-1" />
+              <Plus />
               Add
             </Button>
           )}
@@ -193,9 +187,9 @@ export default function Converter({
 
         <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
           <div className="flex items-end justify-between gap-3 px-1 pb-2">
-            <h2 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
+            <h1 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
               Converter
-            </h2>
+            </h1>
 
             {isClient && (
               <RatesStatus updatedAt={ratesUpdatedAt} error={ratesError} />

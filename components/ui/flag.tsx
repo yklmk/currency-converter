@@ -24,7 +24,7 @@ export function Flag({ countryCode, size = 22, className }: FlagProps) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt={countryCode}
+          alt=""
           width={size}
           height={size}
           className="rounded-full border"
