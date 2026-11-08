@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
-  description: siteConfig.description,
   appleWebApp: {
     title: siteConfig.shortName,
   },
@@ -43,6 +42,22 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
+  },
+  openGraph: {
+    title: siteConfig.name,
+    locale: "en-US",
+    type: "website",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
   },
 }
 
