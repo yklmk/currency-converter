@@ -11,6 +11,8 @@ import { Currency } from "@/types/currency"
 import { cn } from "@/lib/utils"
 import { Flag } from "@/components/ui/flag"
 
+const TYPEAHEAD_RESET_MS = 500
+
 interface CurrenciesListProps {
   currencies: Currency[]
   onSelectCurrency: (currency: Currency) => void
@@ -20,22 +22,18 @@ interface CurrencyListItemProps {
   currency: Currency
   isSelected: boolean
   onClick: MouseEventHandler<HTMLDivElement>
-  onMouseEnter: MouseEventHandler<HTMLDivElement>
 }
 
 const CurrencyListItem = forwardRef<HTMLDivElement, CurrencyListItemProps>(
-  ({ currency, isSelected, onClick, onMouseEnter }, ref) => {
+  ({ currency, isSelected, onClick }, ref) => {
     return (
       <div
         role="option"
         aria-selected={isSelected}
         ref={ref}
         tabIndex={-1}
-        className={
-          "mb-2 flex w-full cursor-pointer items-center rounded-md p-2 outline-hidden transition-shadow select-none focus:bg-accent"
-        }
+        className="mb-2 flex w-full cursor-pointer items-center rounded-md p-2 outline-hidden select-none [contain-intrinsic-size:auto_44px] [content-visibility:auto] hover:bg-accent focus:bg-accent"
         onClick={onClick}
-        onMouseEnter={onMouseEnter}
       >
         <Flag countryCode={currency.countryCode} size={28} />
         <div className="ml-2 flex flex-col justify-center text-left">
@@ -60,12 +58,42 @@ export default function CurrenciesList({
 }: CurrenciesListProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const typeahead = useRef({ query: "", timeout: 0 })
 
   useEffect(() => {
     if (selectedIndex !== null && itemRefs.current[selectedIndex]) {
       itemRefs.current[selectedIndex]?.focus()
     }
   }, [selectedIndex])
+
+  useEffect(() => () => window.clearTimeout(typeahead.current.timeout), [])
+
+  const jumpTo = (key: string) => {
+    const state = typeahead.current
+    window.clearTimeout(state.timeout)
+    state.query += key.toLowerCase()
+    state.timeout = window.setTimeout(() => {
+      state.query = ""
+    }, TYPEAHEAD_RESET_MS)
+
+    const isRepeat = [...state.query].every((char) => char === state.query[0])
+    const query = isRepeat ? state.query[0] : state.query
+    const start = isRepeat ? (selectedIndex ?? -1) + 1 : 0
+    const ordered = [
+      ...currencies.slice(start).map((currency, i) => [currency, start + i]),
+      ...currencies.slice(0, start).map((currency, i) => [currency, i]),
+    ] as [Currency, number][]
+
+    const match = ordered.find(
+      ([currency]) =>
+        currency.currencyName.toLowerCase().startsWith(query) ||
+        currency.currencyCode.toLowerCase().startsWith(query)
+    )
+
+    if (match) {
+      setSelectedIndex(match[1])
+    }
+  }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
@@ -89,6 +117,14 @@ export default function CurrenciesList({
           }
         })
         break
+      case "Home":
+        event.preventDefault()
+        setSelectedIndex(0)
+        break
+      case "End":
+        event.preventDefault()
+        setSelectedIndex(currencies.length - 1)
+        break
       case "Enter":
       case " ":
         event.preventDefault()
@@ -97,6 +133,15 @@ export default function CurrenciesList({
         }
         break
       default:
+        if (
+          event.key.length === 1 &&
+          /\S/.test(event.key) &&
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.altKey
+        ) {
+          jumpTo(event.key)
+        }
         break
     }
   }
@@ -109,14 +154,9 @@ export default function CurrenciesList({
   return (
     <div
       role="listbox"
-      aria-activedescendant={
-        selectedIndex !== null
-          ? `${currencies[selectedIndex].currencyCode}-currency`
-          : undefined
-      }
       tabIndex={0}
       className={cn(
-        "min-h-32 overflow-y-scroll rounded-md border p-2 outline-hidden",
+        "min-h-32 overflow-y-scroll overscroll-contain rounded-[calc(var(--radius-md)+(--spacing(1.5))+1px)] border p-1.5 outline-hidden focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
         className
       )}
       onKeyDown={handleKeyDown}
@@ -130,7 +170,6 @@ export default function CurrenciesList({
           currency={currency}
           isSelected={selectedIndex === index}
           onClick={() => handleItemClick(currency, index)}
-          onMouseEnter={() => setSelectedIndex(index)}
         />
       ))}
     </div>
