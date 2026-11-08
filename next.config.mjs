@@ -12,6 +12,18 @@ const withSerwist = withSerwistInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  eslint: {
+    dirs: [
+      "app",
+      "components",
+      "config",
+      "helpers",
+      "hooks",
+      "lib",
+      "scripts",
+      "types",
+    ],
+  },
 }
 
 export default withSerwist(nextConfig)
