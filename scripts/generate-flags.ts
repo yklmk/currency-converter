@@ -1,6 +1,6 @@
 // Picks the circle flags of the supported currencies out of the whole set
 // (~500 KB) into lib/flags.generated.json (~30 KB), which the client imports.
-// Runs before dev and build, and after install. The output isn't committed.
+// Runs before dev and build. The output isn't committed.
 import { writeFileSync } from "node:fs"
 import { icons } from "@iconify-json/circle-flags"
 

@@ -12,7 +12,6 @@
     "build": "pnpm flags && next build",
     "start": "next start",
     "flags": "node scripts/generate-flags.ts",
-    "postinstall": "pnpm flags",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "pnpm build && next start",
