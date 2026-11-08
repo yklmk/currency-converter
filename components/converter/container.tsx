@@ -13,7 +13,7 @@ export default function Container({
   return (
     <div
       className={cn(
-        "relative flex min-h-125 w-full max-w-125 flex-col rounded-xl border bg-background shadow-md",
+        "relative flex min-h-125 w-full max-w-125 flex-col rounded-[calc(var(--radius-lg)+(--spacing(2))+1px)] border border-transparent bg-background smooth-shadow-ring-md",
         className
       )}
     >
