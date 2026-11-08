@@ -41,6 +41,7 @@ const ReorderItem = <T,>({
       exit="hidden"
       className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:mb-0!"
       role="listitem"
+      tabIndex={-1}
     >
       {children}
       <AnimatePresence initial={false}>
