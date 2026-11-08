@@ -10,19 +10,17 @@ import Bowser from "bowser"
 
 import { Currency } from "@/types/currency"
 import { cn } from "@/lib/utils"
-import { Flag, FlagSetsType } from "@/components/ui/flag"
+import { Flag } from "@/components/ui/flag"
 import { Input } from "@/components/ui/input"
 
 interface CurrencyInputProps extends InputHTMLAttributes<HTMLInputElement> {
   currency: Currency
-  flagSet: FlagSetsType
   containerClassName?: string
   onRemoveShortcut?: (currency: Currency) => void
 }
 
 const CurrencyInput: FC<CurrencyInputProps> = ({
   currency,
-  flagSet,
   containerClassName,
   value,
   onChange,
@@ -30,9 +28,6 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   ...props
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const osName = Bowser.getParser(window.navigator.userAgent).getOSName()
-  const isMac = osName === "macOS"
 
   const focusInput = () => {
     if (inputRef.current) {
@@ -63,6 +58,9 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (onRemoveShortcut) {
+      const osName = Bowser.getParser(window.navigator.userAgent).getOSName()
+      const isMac = osName === "macOS"
+
       if (
         (isMac &&
           event.key === "Backspace" &&
@@ -80,17 +78,17 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     <div
       onClick={focusInput}
       className={cn(
-        "bg-background focus-within:ring-ring ring-offset-background flex w-full cursor-pointer select-none items-center justify-between rounded-lg border p-4 transition-shadow focus-within:ring-2 focus-within:ring-offset-2",
+        "flex w-full cursor-pointer items-center justify-between rounded-lg border bg-background p-4 ring-offset-background transition-shadow select-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
         containerClassName
       )}
     >
       <div className="mr-1 flex shrink-0">
-        <Flag flagSet={flagSet} countryCode={currency.countryCode} size={32} />
+        <Flag countryCode={currency.countryCode} size={32} />
         <div className="ml-3 flex flex-col justify-center">
-          <span className="text-nowrap pb-1 text-base leading-3">
+          <span className="pb-1 text-base leading-3 text-nowrap">
             {currency.currencyName}
           </span>
-          <span className="text-ring text-sm leading-3">
+          <span className="text-sm leading-3 text-ring">
             {currency.currencyCode}
           </span>
         </div>
@@ -99,7 +97,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
       <Input
         ref={inputRef}
         value={value}
-        className="size-auto min-w-3 max-w-[40%] shrink text-ellipsis rounded-none border-none p-0 text-right text-base tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="size-auto max-w-[40%] min-w-3 shrink rounded-md border-none p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 focus-visible:ring-offset-0"
         inputMode="decimal"
         placeholder="0"
         aria-label={`${currency.currencyCode} currency input`}

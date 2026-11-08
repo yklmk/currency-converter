@@ -40,8 +40,6 @@ export default function CurrencySelectModal({
 }: CurrencySelectModalProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  const closeModal = () => onOpenChange(false)
-
   const sortedCurrencies = currencies.sort((a, b) => {
     if (a.currencyName < b.currencyName) {
       return -1
@@ -55,14 +53,14 @@ export default function CurrencySelectModal({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent onEscapeKeyDown={closeModal} className="max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
             <DialogDescription>{DESCRIPTION}</DialogDescription>
           </DialogHeader>
 
           <CurrenciesList
-            className="max-h-[280px]"
+            className="max-h-70"
             currencies={sortedCurrencies}
             onSelectCurrency={setCurrency}
           />
@@ -82,22 +80,20 @@ export default function CurrencySelectModal({
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
       <DrawerContent>
-        <DrawerHeader className="text-left">
+        <DrawerHeader className="text-start">
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
         </DrawerHeader>
 
         <CurrenciesList
-          className="mx-4 max-h-[70dvh]"
+          className="mx-4 max-h-[70dvh] pb-2"
           currencies={sortedCurrencies}
           onSelectCurrency={setCurrency}
         />
 
-        <DrawerFooter className="pt-2">
+        <DrawerFooter className="pb-10">
           <DrawerClose asChild>
-            <Button aria-label="Cancel" variant="outline">
-              Cancel
-            </Button>
+            <Button aria-label="Cancel">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

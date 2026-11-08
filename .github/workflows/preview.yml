@@ -1,5 +1,12 @@
 name: Preview
-on: [workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -10,10 +17,6 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Debug workflow_run event
-        run: |
-          echo "Event payload:"
-          echo "${{ toJson(github.event.workflow_run) }}"
       - name: Checkout
         uses: actions/checkout@v6
 

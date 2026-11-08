@@ -1,14 +1,14 @@
 import { ReactNode, RefObject } from "react"
+import { GripVertical } from "lucide-react"
 import {
   AnimatePresence,
   DraggableProps,
   motion,
   Reorder,
   useDragControls,
-} from "framer-motion"
+} from "motion/react"
 
 import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
 
 import { buttonVariants, itemVariants } from "./variants"
 
@@ -39,7 +39,7 @@ const ReorderItem = <T,>({
       initial="initial"
       animate="visible"
       exit="hidden"
-      className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:!mb-0"
+      className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:mb-0!"
       role="listitem"
     >
       {children}
@@ -50,7 +50,7 @@ const ReorderItem = <T,>({
             size="icon"
             variant="ghost"
             className={
-              "text-border hover:text-ring absolute right-1 z-0 size-6 h-full cursor-grab touch-none transition-colors hover:bg-transparent"
+              "absolute right-1 z-0 size-6 h-full cursor-grab touch-none text-border transition-colors hover:bg-transparent hover:text-ring"
             }
             onPointerDown={(e) => {
               e.currentTarget.style.cursor = "grabbing"
@@ -64,7 +64,7 @@ const ReorderItem = <T,>({
               animate="visible"
               exit="hidden"
             >
-              <Icons.drag />
+              <GripVertical />
             </motion.button>
           </Button>
         )}

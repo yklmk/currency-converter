@@ -9,9 +9,13 @@ export type Rate = Record<CurrencyCode, number>
 export type RatesData = {
   rates: Rate
   remainingQuota: number
+  updatedAt: string
 }
 
 export type RatesResponse = {
+  meta: {
+    last_updated_at: string
+  }
   data: {
     [key in CurrencyCode]: {
       code: CurrencyCode

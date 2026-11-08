@@ -1,5 +1,6 @@
 import { FC, MouseEventHandler, ReactNode } from "react"
 import Bowser from "bowser"
+import { ArrowUpDown, Trash } from "lucide-react"
 
 import {
   ContextMenu,
@@ -8,7 +9,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import KBD from "@/components/ui/KBD"
-import { Icons } from "@/components/icons"
 
 interface InputContextMenuProps {
   disabled: boolean
@@ -25,31 +25,35 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
   onDeleteClick,
   children,
 }) => {
-  const parser = Bowser.getParser(window.navigator.userAgent)
-  const isDesktop = parser.getPlatformType() === "desktop"
-  const osName = parser.getOSName()
-  const isMac = osName === "macOS"
+  // Rows are rendered on the server too, where there is no user agent. The menu
+  // content renders only once opened, so it never differs on hydration.
+  const parser =
+    typeof window === "undefined"
+      ? null
+      : Bowser.getParser(window.navigator.userAgent)
+  const isDesktop = parser?.getPlatformType() === "desktop"
+  const isMac = parser?.getOSName() === "macOS"
 
   return (
     <ContextMenu>
       <ContextMenuTrigger disabled={disabled}>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-40">
         <ContextMenuItem
-          className="cursor-pointer select-none gap-2 p-3 text-sm md:px-2 md:py-1.5"
+          className="cursor-pointer gap-2 p-3 text-sm select-none md:px-2 md:py-1.5"
           onClick={onEditModeClick}
         >
           <span className="flex w-full items-center gap-2">
-            <Icons.shuffle size={16} />
+            <ArrowUpDown size={16} />
             Reorder
           </span>
         </ContextMenuItem>
         <ContextMenuItem
           disabled={isDeleteDisabled}
-          className="text-destructive focus:text-destructive cursor-pointer select-none gap-5 p-3 text-sm md:px-2 md:py-1.5"
+          className="cursor-pointer gap-5 p-3 text-sm text-destructive select-none focus:text-destructive md:px-2 md:py-1.5"
           onClick={onDeleteClick}
         >
           <span className="flex w-full items-center gap-2">
-            <Icons.trash size={16} />
+            <Trash size={16} />
             Delete
           </span>
           {isDesktop ? (

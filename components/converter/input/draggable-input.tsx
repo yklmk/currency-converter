@@ -1,5 +1,6 @@
 import { FC, KeyboardEventHandler, RefObject, useEffect, useRef } from "react"
-import { motion, MotionProps, PanInfo } from "framer-motion"
+import { Trash } from "lucide-react"
+import { motion, MotionProps, PanInfo } from "motion/react"
 import { useOnClickOutside } from "usehooks-ts"
 
 import { Currency, CurrencyCode } from "@/types/currency"
@@ -8,7 +9,6 @@ import {
   CurrencyInput,
   CurrencyInputProps,
 } from "@/components/ui/currency-input"
-import { Icons } from "@/components/icons"
 
 interface DraggableInputProps extends CurrencyInputProps {
   draggable: boolean
@@ -95,11 +95,11 @@ const DraggableInput: FC<DraggableInputProps> = ({
           tabIndex={isDragged ? 0 : -1}
           aria-label="Remove currency"
           variant="destructive"
-          className="absolute right-[-60px] h-[66px] rounded-lg"
+          className="absolute -right-15 h-16.5 rounded-lg"
           onClick={onRemoveClick}
           onKeyDown={handleDeleteButtonKeyDown}
         >
-          <Icons.trash />
+          <Trash />
         </Button>
       </motion.div>
     </motion.div>

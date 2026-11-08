@@ -1,24 +1,26 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
-import { AnimatePresence, Reorder } from "framer-motion"
-import Skeleton from "react-loading-skeleton"
+import { Check, Plus, SettingsIcon } from "lucide-react"
+import { AnimatePresence, Reorder } from "motion/react"
+import { Skeleton } from "skullet/react"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
 
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
-import { Settings } from "@/types/settings"
+import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
-import { Icons } from "@/components/icons"
 import SettingsModal from "@/components/settings-modal"
 
 import Container from "./container"
 import { Input } from "./input"
+import { RatesStatus } from "./rates-status"
 
 interface ConverterProps {
   rates: Rate
+  updatedAt: string
 }
 
 const defaultCurrencies: Currency[] = [
@@ -41,46 +43,15 @@ const defaultCurrencies: Currency[] = [
 
 const MAX_LENGTH = 10
 
-export default function Converter({ rates }: ConverterProps) {
-  const isClient = useIsClient()
+type LastInput = {
+  currencyCode: CurrencyCode
+  value: string
+}
 
-  const [state, setState] = useState<Rate>({} as Rate)
-  const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
-    "currencies",
-    defaultCurrencies
-  )
-  const [settings] = useLocalStorage<Settings>("settings", {
-    flagSet: "colorful",
-  })
-  const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
-    null
-  )
-  const [isCurrenciesListOpen, setIsCurrenciesListOpen] = useState(false)
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
-  const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
-
-  const listRef = useRef<HTMLDivElement>(null)
-  const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const settingsButtonRef = useRef<HTMLButtonElement | null>(null)
-
-  const availableCurrencies = supportedCurrencies.filter((currency) => {
-    return !currencies.some(
-      (item) => item.currencyCode === currency.currencyCode
-    )
-  })
-
-  useEffect(() => {
-    setState(rates)
-  }, [rates])
-
-  const convertCurrencies = (currencyCode: CurrencyCode, value: string) => {
-    setState({ ...state, [currencyCode]: value ? value : "" })
-
-    const filteredCurrencies = Object.keys(state).filter(
-      (key) => key !== currencyCode
-    )
-
-    const convertedCurrencies = filteredCurrencies.reduce((acc, key) => {
+const convert = (rates: Rate, { currencyCode, value }: LastInput): Rate => {
+  const convertedCurrencies = Object.keys(rates)
+    .filter((key) => key !== currencyCode)
+    .reduce((acc, key) => {
       const convertedValue =
         (Number(value) / rates[currencyCode]) * rates[key as keyof Rate]
 
@@ -96,9 +67,60 @@ export default function Converter({ rates }: ConverterProps) {
       }
 
       return { ...acc, [key]: trimmedValue }
-    }, {})
+    }, {} as Rate)
 
-    setState((prev) => ({ ...prev, ...convertedCurrencies }))
+  return { ...convertedCurrencies, [currencyCode]: value ? value : "" }
+}
+
+export default function Converter({
+  rates: serverRates,
+  updatedAt,
+}: ConverterProps) {
+  const isClient = useIsClient()
+  const serverSnapshot = useMemo(
+    () => ({ rates: serverRates, updatedAt }),
+    [serverRates, updatedAt]
+  )
+  const {
+    rates,
+    updatedAt: ratesUpdatedAt,
+    error: ratesError,
+  } = useRates(serverSnapshot)
+
+  const [state, setState] = useState<Rate>({} as Rate)
+  const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
+    "currencies",
+    defaultCurrencies
+  )
+  const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
+    null
+  )
+  const [isCurrenciesListOpen, setIsCurrenciesListOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
+
+  const listRef = useRef<HTMLDivElement>(null)
+  const addButtonRef = useRef<HTMLButtonElement | null>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement | null>(null)
+  const lastInputRef = useRef<LastInput | null>(null)
+
+  const availableCurrencies = supportedCurrencies.filter((currency) => {
+    return !currencies.some(
+      (item) => item.currencyCode === currency.currencyCode
+    )
+  })
+
+  // When rates are refreshed in the background, recalculate from the last
+  // entered value instead of resetting the inputs.
+  useEffect(() => {
+    setState(
+      lastInputRef.current ? convert(rates, lastInputRef.current) : rates
+    )
+  }, [rates])
+
+  const convertCurrencies = (currencyCode: CurrencyCode, value: string) => {
+    lastInputRef.current = { currencyCode, value }
+    setState(convert(rates, lastInputRef.current))
   }
 
   const onSelectCurrency = (currency: Currency) => {
@@ -163,7 +185,7 @@ export default function Converter({ rates }: ConverterProps) {
               aria-label="Settings"
               onClick={onOpenSettingsModal}
             >
-              <Icons.settings size={20} />
+              <SettingsIcon size={20} />
             </Button>
           </div>
           {isEditModeEnabled ? (
@@ -173,7 +195,7 @@ export default function Converter({ rates }: ConverterProps) {
               aria-label="Done"
               onClick={onDisableEditMode}
             >
-              <Icons.check size={18} className="mr-1" />
+              <Check size={18} className="mr-1" />
               Done
             </Button>
           ) : (
@@ -185,69 +207,74 @@ export default function Converter({ rates }: ConverterProps) {
               aria-label="Add currency"
               onClick={onOpenCurrenciesList}
             >
-              <Icons.plus size={18} className="mr-1" />
+              <Plus size={18} className="mr-1" />
               Add
             </Button>
           )}
         </div>
 
-        <div className="flex flex-col px-3 pb-10 pt-4 sm:mx-auto sm:w-[70%]">
-          <h2 className="pb-5 pl-1 text-3xl font-bold leading-tight tracking-tighter">
-            Converter
-          </h2>
+        <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
+          <div className="flex items-end justify-between gap-3 px-1 pb-2">
+            <h2 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
+              Converter
+            </h2>
+
+            {isClient && (
+              <RatesStatus updatedAt={ratesUpdatedAt} error={ratesError} />
+            )}
+          </div>
 
           <div ref={listRef}>
-            {!isClient ? (
-              <Skeleton
-                containerClassName="flex flex-col"
-                className="mb-4"
-                width={"100%"}
-                height={66}
-                count={4}
-                inline
-              />
-            ) : (
-              <Reorder.Group
-                layoutScroll
-                axis="y"
-                values={currencies}
-                className="relative flex flex-col"
-                role="list"
-                onReorder={setCurrencies}
-              >
-                <AnimatePresence initial={false} mode="sync">
-                  {currencies.map((currency) => (
-                    <InputContextMenu
-                      key={currency.currencyCode}
-                      disabled={isEditModeEnabled}
-                      isDeleteDisabled={currencies.length <= 2}
-                      onEditModeClick={onEnableEditMode}
-                      onDeleteClick={() => onRemoveCurrency(currency)}
-                    >
-                      <Input
-                        showControls={isEditModeEnabled}
-                        flagSet={settings.flagSet}
-                        currency={currency}
-                        value={state[currency.currencyCode] || ""}
-                        maxLength={MAX_LENGTH}
-                        dragConstraints={listRef}
-                        draggable={currencies.length > 2}
-                        isDragged={currency.currencyCode === draggedCurrency}
-                        setIsDragged={setIsDragged}
-                        onChange={(event) =>
-                          convertCurrencies(
-                            currency.currencyCode,
-                            event.target.value
-                          )
-                        }
-                        onRemove={onRemoveCurrency}
-                        onRemoveShortcut={onRemoveCurrency}
-                      />
-                    </InputContextMenu>
-                  ))}
-                </AnimatePresence>
-              </Reorder.Group>
-            )}
+            <Skeleton
+              id="currencies"
+              label="Loading currencies"
+              // The server can't read localStorage, so until the page is
+              // hydrated the list is a skeleton drawn from the defaults.
+              data={isClient ? currencies : null}
+              sample={defaultCurrencies}
+            >
+              {(list) => (
+                <Reorder.Group
+                  layoutScroll
+                  axis="y"
+                  values={list}
+                  className="relative flex flex-col"
+                  role="list"
+                  onReorder={setCurrencies}
+                >
+                  <AnimatePresence initial={false} mode="sync">
+                    {list.map((currency) => (
+                      <InputContextMenu
+                        key={currency.currencyCode}
+                        disabled={isEditModeEnabled}
+                        isDeleteDisabled={list.length <= 2}
+                        onEditModeClick={onEnableEditMode}
+                        onDeleteClick={() => onRemoveCurrency(currency)}
+                      >
+                        <Input
+                          showControls={isEditModeEnabled}
+                          currency={currency}
+                          value={state[currency.currencyCode] || ""}
+                          maxLength={MAX_LENGTH}
+                          dragConstraints={listRef}
+                          draggable={list.length > 2}
+                          isDragged={currency.currencyCode === draggedCurrency}
+                          setIsDragged={setIsDragged}
+                          onChange={(event) =>
+                            convertCurrencies(
+                              currency.currencyCode,
+                              event.target.value
+                            )
+                          }
+                          onRemove={onRemoveCurrency}
+                          onRemoveShortcut={onRemoveCurrency}
+                        />
+                      </InputContextMenu>
+                    ))}
+                  </AnimatePresence>
+                </Reorder.Group>
+              )}
+            </Skeleton>
           </div>
         </div>
       </Container>

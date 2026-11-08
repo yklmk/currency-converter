@@ -1,6 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-kbd: hsl(var(--kbd));
+
+  --color-error: var(--color-red-400);
+}
 
 @layer base {
   :root {
@@ -34,12 +71,10 @@
 
     --ring: 240 5% 64.9%;
 
-    --radius: 0.5rem;
-
     --kbd: 0 0% 88%;
 
-    --skeleton-bg: 0 0% 95%;
-    --skeleton-highlight: 0 0% 98%;
+    --skullet-base: rgb(0 0 0 / 0.07);
+    --skullet-highlight: rgb(255 255 255 / 0.6);
   }
 
   .dark {
@@ -75,14 +110,19 @@
 
     --kbd: 0 0% 32%;
 
-    --skeleton-bg: 0 0% 20%;
-    --skeleton-highlight: 0 0% 15%;
+    --skullet-base: rgb(255 255 255 / 0.08);
+    --skullet-highlight: rgb(255 255 255 / 0.1);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 
   body {
@@ -99,4 +139,17 @@
     margin: 0;
     -moz-appearance: textfield !important;
   }
+
+  /* skullet draws a skeleton's bars in a layer over the content it measures.
+     The currency rows raise their surface with z-index, which would cover the
+     bars, so the measured content gets its own stacking context. */
+  [skullet-ghost] {
+    isolation: isolate;
+  }
+}
+
+/* The skeleton's bar for an amount: about as wide as "1.00", not the whole
+   input. Outside @layer, so it wins over the input's size-auto utility. */
+[skullet-ghost] input {
+  width: 4ch;
 }

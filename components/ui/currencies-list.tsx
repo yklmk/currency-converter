@@ -32,7 +32,7 @@ const CurrencyListItem = forwardRef<HTMLDivElement, CurrencyListItemProps>(
         ref={ref}
         tabIndex={-1}
         className={
-          "focus:bg-accent mb-2 flex w-full cursor-pointer select-none items-center rounded-md p-2 outline-none transition-shadow"
+          "mb-2 flex w-full cursor-pointer items-center rounded-md p-2 outline-hidden transition-shadow select-none focus:bg-accent"
         }
         onClick={onClick}
         onMouseEnter={onMouseEnter}
@@ -42,7 +42,7 @@ const CurrencyListItem = forwardRef<HTMLDivElement, CurrencyListItemProps>(
           <span className="mb-1 text-base leading-3">
             {currency.currencyName}
           </span>
-          <span className="text-ring text-sm leading-3">
+          <span className="text-sm leading-3 text-ring">
             {currency.currencyCode}
           </span>
         </div>
@@ -116,7 +116,7 @@ export default function CurrenciesList({
       }
       tabIndex={0}
       className={cn(
-        "min-h-32 overflow-y-scroll rounded-md border p-2 outline-none",
+        "min-h-32 overflow-y-scroll rounded-md border p-2 outline-hidden",
         className
       )}
       onKeyDown={handleKeyDown}
