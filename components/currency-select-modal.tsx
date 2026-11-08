@@ -80,22 +80,20 @@ export default function CurrencySelectModal({
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
       <DrawerContent>
-        <DrawerHeader className="text-left">
+        <DrawerHeader className="text-start">
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
         </DrawerHeader>
 
         <CurrenciesList
-          className="mx-4 max-h-[70dvh]"
+          className="mx-4 max-h-[70dvh] pb-2"
           currencies={sortedCurrencies}
           onSelectCurrency={setCurrency}
         />
 
-        <DrawerFooter className="pt-2">
+        <DrawerFooter className="pb-10">
           <DrawerClose asChild>
-            <Button aria-label="Cancel" variant="outline">
-              Cancel
-            </Button>
+            <Button aria-label="Cancel">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

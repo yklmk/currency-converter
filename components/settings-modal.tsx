@@ -117,7 +117,7 @@ export default function SettingsModal({
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <DrawerHeader>
+        <DrawerHeader className="text-start">
           <DrawerTitle>{TITLE}</DrawerTitle>
         </DrawerHeader>
 
@@ -131,7 +131,7 @@ export default function SettingsModal({
           </Label>
         </div>
 
-        <DrawerFooter>
+        <DrawerFooter className="pb-10">
           <DrawerClose asChild>
             <Button aria-label="Close">Close</Button>
           </DrawerClose>
