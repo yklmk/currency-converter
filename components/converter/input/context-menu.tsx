@@ -1,4 +1,4 @@
-import { FC, MouseEventHandler, ReactNode } from "react"
+import { FC, MouseEventHandler, ReactNode, useRef } from "react"
 import Bowser from "bowser"
 import { ArrowUpDown, Trash } from "lucide-react"
 
@@ -14,7 +14,7 @@ interface InputContextMenuProps {
   disabled: boolean
   isDeleteDisabled?: boolean
   onEditModeClick: MouseEventHandler<HTMLDivElement>
-  onDeleteClick: MouseEventHandler<HTMLDivElement>
+  onDeleteClick: () => void
   children: ReactNode
 }
 
@@ -25,6 +25,7 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
   onDeleteClick,
   children,
 }) => {
+  const deleteOnClose = useRef<boolean>(false)
   // Rows are rendered on the server too, where there is no user agent. The menu
   // content renders only once opened, so it never differs on hydration.
   const parser =
@@ -36,8 +37,20 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger disabled={disabled}>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="min-w-40">
+      <ContextMenuTrigger asChild disabled={disabled}>
+        {children}
+      </ContextMenuTrigger>
+      <ContextMenuContent
+        className="min-w-40"
+        onCloseAutoFocus={(event) => {
+          if (deleteOnClose.current) {
+            // Don't restore focus to the row being removed.
+            event.preventDefault()
+            deleteOnClose.current = false
+            onDeleteClick()
+          }
+        }}
+      >
         <ContextMenuItem
           className="cursor-pointer max-md:p-3"
           onClick={onEditModeClick}
@@ -49,7 +62,9 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
           variant="destructive"
           disabled={isDeleteDisabled}
           className="cursor-pointer max-md:p-3"
-          onClick={onDeleteClick}
+          onSelect={() => {
+            deleteOnClose.current = true
+          }}
         >
           <Trash />
           Delete

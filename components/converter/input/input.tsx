@@ -1,43 +1,50 @@
-import { MotionProps } from "motion/react"
+import { Currency } from "@/types/currency"
 
+import InputContextMenu from "./context-menu"
 import { DraggableInput, DraggableInputProps } from "./draggable-input"
 import { ReorderItem, ReorderItemProps } from "./reorderItem"
 
-type InputProps<T> = DraggableInputProps &
-  Omit<ReorderItemProps<T>, "children"> & {}
-
-const Input = <T,>({
-  currency,
-  value,
-  draggable,
-  isDragged,
-  showControls,
-  dragConstraints,
-  ...props
-}: InputProps<T>) => {
-  const motionProps: MotionProps = {
-    animate: {
-      width: showControls ? "90%" : "100%",
-    },
+type InputProps = DraggableInputProps &
+  Omit<ReorderItemProps<Currency>, "children" | "value" | "label"> & {
+    onEditModeClick: () => void
   }
 
-  return (
-    <ReorderItem
-      value={currency}
-      showControls={showControls}
-      dragConstraints={dragConstraints}
+const Input = ({
+  currency,
+  value,
+  canRemove,
+  isOpen,
+  showControls,
+  dragConstraints,
+  onEditModeClick,
+  onRemove,
+  ...props
+}: InputProps) => (
+  <ReorderItem
+    value={currency}
+    label={`Reorder ${currency.currencyCode}`}
+    showControls={showControls}
+    dragConstraints={dragConstraints}
+  >
+    <InputContextMenu
+      disabled={showControls}
+      isDeleteDisabled={!canRemove}
+      onEditModeClick={onEditModeClick}
+      onDeleteClick={() => onRemove(currency)}
     >
-      <DraggableInput
-        value={value}
-        currency={currency}
-        draggable={draggable && !showControls}
-        isDragged={isDragged}
-        disabled={showControls || isDragged}
-        motionProps={motionProps}
-        {...props}
-      />
-    </ReorderItem>
-  )
-}
+      <div className="min-w-0 flex-1">
+        <DraggableInput
+          value={value}
+          currency={currency}
+          canRemove={canRemove}
+          isOpen={isOpen}
+          disabled={showControls}
+          onRemove={onRemove}
+          {...props}
+        />
+      </div>
+    </InputContextMenu>
+  </ReorderItem>
+)
 
 export { Input }

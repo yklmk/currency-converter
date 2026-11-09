@@ -86,7 +86,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     <label
       onClick={handleCardClick}
       className={cn(
-        "flex w-full cursor-pointer items-center justify-between rounded-lg border bg-background p-4 transition-[border-color,box-shadow] select-none focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+        "flex w-full cursor-pointer items-center justify-between bg-background p-4 select-none",
         containerClassName
       )}
     >

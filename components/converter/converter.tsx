@@ -10,7 +10,6 @@ import { useIsClient, useLocalStorage } from "usehooks-ts"
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
 import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
-import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 
@@ -92,11 +91,10 @@ export default function Converter({
     "currencies",
     defaultCurrencies
   )
-  const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
-    null
-  )
-  const [isCurrenciesListOpen, setIsCurrenciesListOpen] = useState(false)
-  const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
+  const [openCurrency, setOpenCurrency] = useState<CurrencyCode | null>(null)
+  const [isCurrenciesListOpen, setIsCurrenciesListOpen] =
+    useState<boolean>(false)
+  const [isEditModeEnabled, setIsEditModeEnabled] = useState<boolean>(false)
 
   const listRef = useRef<HTMLDivElement>(null)
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -128,24 +126,28 @@ export default function Converter({
   }
 
   const onOpenCurrenciesList = () => setIsCurrenciesListOpen(true)
-  const onEnableEditMode = () => setIsEditModeEnabled(true)
+  const onEnableEditMode = () => {
+    setOpenCurrency(null)
+    setIsEditModeEnabled(true)
+  }
   const onDisableEditMode = () => setIsEditModeEnabled(false)
 
   const onRemoveCurrency = (currency: Currency) => {
     if (currencies.length > 2) {
+      setOpenCurrency(null)
       setCurrencies((prev) =>
         prev.filter((item) => item.currencyCode !== currency.currencyCode)
       )
     }
   }
 
-  const setIsDragged = (currencyCode: CurrencyCode, value: boolean) => {
+  const onSwipeOpenChange = (currencyCode: CurrencyCode, value: boolean) => {
     if (value) {
       if (currencies.length > 2) {
-        setDraggedCurrency(currencyCode)
+        setOpenCurrency(currencyCode)
       }
     } else {
-      setDraggedCurrency((prev) => (prev === currencyCode ? null : prev))
+      setOpenCurrency((prev) => (prev === currencyCode ? null : prev))
     }
   }
 
@@ -185,8 +187,8 @@ export default function Converter({
           )}
         </div>
 
-        <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
-          <div className="flex items-end justify-between gap-3 px-1 pb-2">
+        <div className="flex flex-col px-4 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
+          <div className="flex items-end justify-between gap-3 pb-3">
             <h1 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
               Converter
             </h1>
@@ -216,32 +218,26 @@ export default function Converter({
                 >
                   <AnimatePresence initial={false} mode="sync">
                     {list.map((currency) => (
-                      <InputContextMenu
+                      <Input
                         key={currency.currencyCode}
-                        disabled={isEditModeEnabled}
-                        isDeleteDisabled={list.length <= 2}
+                        showControls={isEditModeEnabled}
+                        currency={currency}
+                        value={state[currency.currencyCode] || ""}
+                        maxLength={MAX_LENGTH}
+                        dragConstraints={listRef}
+                        canRemove={list.length > 2}
+                        isOpen={currency.currencyCode === openCurrency}
+                        onOpenChange={onSwipeOpenChange}
                         onEditModeClick={onEnableEditMode}
-                        onDeleteClick={() => onRemoveCurrency(currency)}
-                      >
-                        <Input
-                          showControls={isEditModeEnabled}
-                          currency={currency}
-                          value={state[currency.currencyCode] || ""}
-                          maxLength={MAX_LENGTH}
-                          dragConstraints={listRef}
-                          draggable={list.length > 2}
-                          isDragged={currency.currencyCode === draggedCurrency}
-                          setIsDragged={setIsDragged}
-                          onChange={(event) =>
-                            convertCurrencies(
-                              currency.currencyCode,
-                              event.target.value
-                            )
-                          }
-                          onRemove={onRemoveCurrency}
-                          onRemoveShortcut={onRemoveCurrency}
-                        />
-                      </InputContextMenu>
+                        onChange={(event) =>
+                          convertCurrencies(
+                            currency.currencyCode,
+                            event.target.value
+                          )
+                        }
+                        onRemove={onRemoveCurrency}
+                        onRemoveShortcut={onRemoveCurrency}
+                      />
                     ))}
                   </AnimatePresence>
                 </Reorder.Group>

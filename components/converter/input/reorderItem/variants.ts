@@ -9,26 +9,40 @@ const itemVariants: Variants = {
   visible: {
     height: "auto",
     opacity: 1,
-    marginBottom: "0.75rem",
+    marginBottom: "0.5rem",
     transition: {
-      type: "spring",
-      bounce: 0,
-      duration: 0.6,
-      opacity: { delay: 0.1 },
+      type: "tween",
+      duration: 0.25,
+      ease: [0.25, 1, 0.5, 1],
+      opacity: { duration: 0.15 },
     },
   },
   hidden: {
     height: 0,
     opacity: 0,
-    scale: 0.8,
     marginBottom: 0,
     transition: {
-      type: "spring",
-      bounce: 0,
-      duration: 0.6,
+      type: "tween",
+      duration: 0.22,
+      ease: [0.25, 1, 0.5, 1],
       opacity: { duration: 0.15 },
-      scale: { duration: 0.2 },
     },
+  },
+}
+
+const reducedItemVariants: Variants = {
+  initial: itemVariants.initial,
+  visible: {
+    height: "auto",
+    opacity: 1,
+    marginBottom: "0.5rem",
+    transition: { duration: 0, opacity: { duration: 0.15 } },
+  },
+  hidden: {
+    height: 0,
+    opacity: 0,
+    marginBottom: 0,
+    transition: { duration: 0, opacity: { duration: 0.15 } },
   },
 }
 
@@ -49,4 +63,4 @@ const buttonVariants: Variants = {
   },
 }
 
-export { itemVariants, buttonVariants }
+export { itemVariants, reducedItemVariants, buttonVariants }

@@ -1,4 +1,4 @@
-import { ReactNode, RefObject } from "react"
+import { ReactNode } from "react"
 import { GripVertical } from "lucide-react"
 import {
   AnimatePresence,
@@ -6,16 +6,19 @@ import {
   motion,
   Reorder,
   useDragControls,
+  useIsPresent,
+  useReducedMotion,
 } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 
-import { buttonVariants, itemVariants } from "./variants"
+import { buttonVariants, itemVariants, reducedItemVariants } from "./variants"
 
 export interface ReorderItemProps<T> {
   value: T
   dragConstraints: DraggableProps["dragConstraints"]
   showControls: boolean
+  label: string
   children: ReactNode
 }
 
@@ -23,25 +26,29 @@ const ReorderItem = <T,>({
   dragConstraints,
   value,
   showControls,
+  label,
   children,
 }: ReorderItemProps<T>) => {
   const controls = useDragControls()
+  const isPresent = useIsPresent()
+  const reducedMotion = useReducedMotion()
 
   return (
     <Reorder.Item
       dragConstraints={dragConstraints}
       dragElastic={0.2}
-      whileDrag={{ scale: 1.03 }}
+      whileDrag={{ scale: reducedMotion ? 1 : 1.03 }}
       value={value}
       dragControls={controls}
       dragListener={false}
-      variants={itemVariants}
+      variants={reducedMotion ? reducedItemVariants : itemVariants}
       initial="initial"
       animate="visible"
       exit="hidden"
-      className="relative mb-3 box-border flex w-full items-center rounded-lg bg-transparent last:mb-0!"
+      className="relative mb-2 box-border flex w-full items-center gap-2 rounded-lg bg-transparent last:mb-0!"
       role="listitem"
       tabIndex={-1}
+      inert={!isPresent}
     >
       {children}
       <AnimatePresence initial={false}>
@@ -51,8 +58,9 @@ const ReorderItem = <T,>({
             size="icon"
             variant="ghost"
             className={
-              "absolute right-1 z-0 size-6 h-full cursor-grab touch-none text-border transition-colors hover:bg-transparent hover:text-ring dark:hover:bg-transparent"
+              "h-auto w-6 shrink-0 cursor-grab touch-none self-stretch text-border transition-colors hover:bg-transparent hover:text-ring dark:hover:bg-transparent"
             }
+            aria-label={label}
             onPointerDown={(e) => {
               e.currentTarget.style.cursor = "grabbing"
               controls.start(e, { snapToCursor: true })
