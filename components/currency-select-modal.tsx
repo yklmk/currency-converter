@@ -30,7 +30,7 @@ interface CurrencySelectModalProps {
 }
 
 const TITLE = "Select Currency"
-const DESCRIPTION = "Choose the currency you want to add"
+const DESCRIPTION = "Choose the currency you want to use"
 
 export default function CurrencySelectModal({
   isOpen,
