@@ -1,13 +1,22 @@
-import { Currency } from "@/types/currency"
+import { Currency, CurrencyCode } from "@/types/currency"
 
 import InputContextMenu from "./context-menu"
-import { DraggableInput, DraggableInputProps } from "./draggable-input"
+import { DraggableInput } from "./draggable-input"
 import { ReorderItem, ReorderItemProps } from "./reorderItem"
 
-type InputProps = DraggableInputProps &
-  Omit<ReorderItemProps<Currency>, "children" | "value" | "label"> & {
-    onEditModeClick: () => void
-  }
+interface InputProps {
+  currency: Currency
+  value: string
+  maxLength: number
+  canRemove: boolean
+  isOpen: boolean
+  showControls: boolean
+  dragConstraints: ReorderItemProps<Currency>["dragConstraints"]
+  onValueChange: (value: string) => void
+  onOpenChange: (currencyCode: CurrencyCode, isOpen: boolean) => void
+  onEditModeClick: () => void
+  onRemove: (currency: Currency) => void
+}
 
 const Input = ({
   currency,
@@ -18,7 +27,9 @@ const Input = ({
   dragConstraints,
   onEditModeClick,
   onRemove,
-  ...props
+  maxLength,
+  onValueChange,
+  onOpenChange,
 }: InputProps) => (
   <ReorderItem
     value={currency}
@@ -40,7 +51,10 @@ const Input = ({
           isOpen={isOpen}
           disabled={showControls}
           onRemove={onRemove}
-          {...props}
+          maxLength={maxLength}
+          onValueChange={onValueChange}
+          onOpenChange={onOpenChange}
+          onRemoveShortcut={canRemove ? onRemove : undefined}
         />
       </div>
     </InputContextMenu>

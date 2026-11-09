@@ -18,10 +18,10 @@ const log = createLogger("rates")
 const useFixture =
   process.env.NODE_ENV === "development" || process.env.RATES_FIXTURE === "1"
 
-const normalizeRates = ({ data }: RatesResponse) =>
-  Object.values(data).reduce((acc, { code, value }) => {
-    return { ...acc, [code]: value.toFixed(2) }
-  }, {} as Rate)
+const normalizeRates = ({ data }: RatesResponse): Rate =>
+  Object.fromEntries(
+    Object.values(data).map(({ code, value }) => [code, value])
+  ) as Rate
 
 export const fetchRates = async (): Promise<RatesData> => {
   if (useFixture) {

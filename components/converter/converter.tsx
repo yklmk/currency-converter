@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
 import { Check, Plus } from "lucide-react"
 import { AnimatePresence, Reorder } from "motion/react"
@@ -8,6 +8,7 @@ import { Skeleton } from "skullet/react"
 import { useIsClient, useLocalStorage } from "usehooks-ts"
 
 import { Currency, CurrencyCode, Rate } from "@/types/currency"
+import { convertAmounts, CurrencyAmount } from "@/lib/convert"
 import { useRates } from "@/hooks/use-rates"
 import { Button } from "@/components/ui/button"
 import CurrencySelectModal from "@/components/currency-select-modal"
@@ -42,35 +43,6 @@ const defaultCurrencies: Currency[] = [
 
 const MAX_LENGTH = 10
 
-type LastInput = {
-  currencyCode: CurrencyCode
-  value: string
-}
-
-const convert = (rates: Rate, { currencyCode, value }: LastInput): Rate => {
-  const convertedCurrencies = Object.keys(rates)
-    .filter((key) => key !== currencyCode)
-    .reduce((acc, key) => {
-      const convertedValue =
-        (Number(value) / rates[currencyCode]) * rates[key as keyof Rate]
-
-      const formattedValue = convertedValue.toFixed(2).toString()
-
-      let trimmedValue =
-        formattedValue.length > MAX_LENGTH
-          ? formattedValue.slice(0, MAX_LENGTH)
-          : formattedValue
-
-      if (trimmedValue.endsWith(".")) {
-        trimmedValue = trimmedValue.slice(0, -1)
-      }
-
-      return { ...acc, [key]: trimmedValue }
-    }, {} as Rate)
-
-  return { ...convertedCurrencies, [currencyCode]: value ? value : "" }
-}
-
 export default function Converter({
   rates: serverRates,
   updatedAt,
@@ -86,7 +58,8 @@ export default function Converter({
     error: ratesError,
   } = useRates(serverSnapshot)
 
-  const [state, setState] = useState<Rate>({} as Rate)
+  const [lastInput, setLastInput] = useState<CurrencyAmount | null>(null)
+  const amounts = convertAmounts(rates, lastInput)
   const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
     "currencies",
     defaultCurrencies
@@ -98,7 +71,6 @@ export default function Converter({
 
   const listRef = useRef<HTMLDivElement>(null)
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const lastInputRef = useRef<LastInput | null>(null)
 
   const availableCurrencies = supportedCurrencies.filter((currency) => {
     return !currencies.some(
@@ -106,23 +78,17 @@ export default function Converter({
     )
   })
 
-  // When rates are refreshed in the background, recalculate from the last
-  // entered value instead of resetting the inputs.
-  useEffect(() => {
-    setState(
-      lastInputRef.current ? convert(rates, lastInputRef.current) : rates
+  const onSelectCurrency = (currency: Currency) => {
+    setCurrencies((prev) =>
+      prev.some((item) => item.currencyCode === currency.currencyCode)
+        ? prev
+        : [...prev, currency]
     )
-  }, [rates])
-
-  const convertCurrencies = (currencyCode: CurrencyCode, value: string) => {
-    lastInputRef.current = { currencyCode, value }
-    setState(convert(rates, lastInputRef.current))
+    setIsCurrenciesListOpen(false)
   }
 
-  const onSelectCurrency = (currency: Currency) => {
-    setIsCurrenciesListOpen(false)
-    setTimeout(() => setCurrencies((prev) => [...prev, currency]), 200)
-    setTimeout(() => addButtonRef.current?.focus(), 100)
+  const onCurrencySelectModalClose = () => {
+    addButtonRef.current?.focus()
   }
 
   const onOpenCurrenciesList = () => setIsCurrenciesListOpen(true)
@@ -136,7 +102,9 @@ export default function Converter({
     if (currencies.length > 2) {
       setOpenCurrency(null)
       setCurrencies((prev) =>
-        prev.filter((item) => item.currencyCode !== currency.currencyCode)
+        prev.length > 2
+          ? prev.filter((item) => item.currencyCode !== currency.currencyCode)
+          : prev
       )
     }
   }
@@ -149,16 +117,6 @@ export default function Converter({
     } else {
       setOpenCurrency((prev) => (prev === currencyCode ? null : prev))
     }
-  }
-
-  const onCurrencySelectModalOpenChange = (open: boolean) => {
-    if (!open) {
-      setTimeout(() => {
-        addButtonRef.current?.focus()
-      }, 100)
-    }
-
-    setIsCurrenciesListOpen(open)
   }
 
   return (
@@ -222,21 +180,20 @@ export default function Converter({
                         key={currency.currencyCode}
                         showControls={isEditModeEnabled}
                         currency={currency}
-                        value={state[currency.currencyCode] || ""}
+                        value={amounts[currency.currencyCode] ?? ""}
                         maxLength={MAX_LENGTH}
                         dragConstraints={listRef}
                         canRemove={list.length > 2}
                         isOpen={currency.currencyCode === openCurrency}
                         onOpenChange={onSwipeOpenChange}
                         onEditModeClick={onEnableEditMode}
-                        onChange={(event) =>
-                          convertCurrencies(
-                            currency.currencyCode,
-                            event.target.value
-                          )
+                        onValueChange={(value) =>
+                          setLastInput({
+                            currencyCode: currency.currencyCode,
+                            value,
+                          })
                         }
                         onRemove={onRemoveCurrency}
-                        onRemoveShortcut={onRemoveCurrency}
                       />
                     ))}
                   </AnimatePresence>
@@ -249,7 +206,8 @@ export default function Converter({
 
       <CurrencySelectModal
         isOpen={isCurrenciesListOpen}
-        onOpenChange={onCurrencySelectModalOpenChange}
+        onOpenChange={setIsCurrenciesListOpen}
+        onClose={onCurrencySelectModalClose}
         currencies={availableCurrencies}
         setCurrency={onSelectCurrency}
       />

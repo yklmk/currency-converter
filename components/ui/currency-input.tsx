@@ -1,15 +1,18 @@
 import {
   ChangeEventHandler,
+  ClipboardEventHandler,
   FC,
   InputHTMLAttributes,
   KeyboardEventHandler,
   MouseEventHandler,
+  useId,
   useRef,
+  useState,
 } from "react"
 import Bowser from "bowser"
 
 import { Currency } from "@/types/currency"
-import { cn } from "@/lib/utils"
+import { normalizePastedAmount } from "@/lib/normalize-pasted-amount"
 import { Flag } from "@/components/ui/flag"
 import { Input } from "@/components/ui/input"
 
@@ -24,21 +27,25 @@ function isMac() {
   return isMacCache
 }
 
-interface CurrencyInputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface CurrencyInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "onChange" | "onPaste"
+> {
+  onValueChange: (value: string) => void
   currency: Currency
-  containerClassName?: string
   onRemoveShortcut?: (currency: Currency) => void
 }
 
 const CurrencyInput: FC<CurrencyInputProps> = ({
   currency,
-  containerClassName,
   value,
-  onChange,
+  onValueChange,
   onRemoveShortcut,
   ...props
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [pasteError, setPasteError] = useState<string | null>(null)
+  const pasteErrorId = useId()
 
   // A click on the field itself keeps the browser's caret. A click elsewhere
   // on the card focuses the field with the caret at the end, where a label
@@ -62,11 +69,47 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     newValue = newValue.replace(",", ".")
 
     if (newValue === "" || /^\d+\.?\d*$/.test(newValue)) {
-      if (onChange) {
-        event.target.value = newValue
-        onChange(event)
-      }
+      setPasteError(null)
+      onValueChange(newValue)
     }
+  }
+
+  const handlePaste: ClipboardEventHandler<HTMLInputElement> = (event) => {
+    event.preventDefault()
+    const input = event.currentTarget
+
+    if (input.readOnly || input.disabled) {
+      return
+    }
+
+    const normalized = normalizePastedAmount(
+      event.clipboardData.getData("text/plain")
+    )
+    if (normalized === null) {
+      setPasteError("Paste a valid number.")
+      return
+    }
+
+    const start = input.selectionStart ?? input.value.length
+    const end = input.selectionEnd ?? start
+    const nextValue =
+      input.value.slice(0, start) + normalized + input.value.slice(end)
+
+    if (!/^\d+\.?\d*$/.test(nextValue)) {
+      setPasteError(
+        "The resulting number would have multiple decimal separators."
+      )
+      return
+    }
+
+    if (input.maxLength >= 0 && nextValue.length > input.maxLength) {
+      setPasteError(`Use no more than ${input.maxLength} characters.`)
+      return
+    }
+
+    setPasteError(null)
+    input.setRangeText(normalized, start, end, "end")
+    onValueChange(nextValue)
   }
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -83,39 +126,49 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   }
 
   return (
-    <label
-      onClick={handleCardClick}
-      className={cn(
-        "flex w-full cursor-pointer items-center justify-between bg-background p-4 select-none",
-        containerClassName
-      )}
-    >
-      <div className="mr-1 flex shrink-0">
-        <Flag countryCode={currency.countryCode} size={32} />
-        <div className="ml-3 flex flex-col justify-center">
-          <span className="pb-1 text-base leading-3 text-nowrap">
-            {currency.currencyName}
-          </span>
-          <span className="text-sm leading-3 text-ring">
-            {currency.currencyCode}
-          </span>
+    <>
+      <label
+        onClick={handleCardClick}
+        className="flex w-full cursor-pointer items-center justify-between bg-background p-4 select-none"
+      >
+        <div className="mr-1 flex shrink-0">
+          <Flag countryCode={currency.countryCode} size={32} />
+          <div className="ml-3 flex flex-col justify-center">
+            <span className="pb-1 text-base leading-3 text-nowrap">
+              {currency.currencyName}
+            </span>
+            <span className="text-sm leading-3 text-ring">
+              {currency.currencyCode}
+            </span>
+          </div>
         </div>
-      </div>
 
-      <Input
-        ref={inputRef}
-        value={value}
-        className="size-auto max-w-[40%] min-w-3 shrink border-none bg-transparent p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
-        name={currency.currencyCode}
-        inputMode="decimal"
-        autoComplete="off"
-        placeholder="0"
-        aria-label={`${currency.currencyCode} currency input`}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        {...props}
-      />
-    </label>
+        <Input
+          ref={inputRef}
+          value={value}
+          className="size-auto max-w-[40%] min-w-3 shrink border-none bg-transparent p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
+          name={currency.currencyCode}
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="0"
+          aria-label={`${currency.currencyCode} currency input`}
+          aria-describedby={pasteErrorId}
+          onPaste={handlePaste}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          {...props}
+        />
+      </label>
+      <p
+        id={pasteErrorId}
+        role="status"
+        className={
+          pasteError ? "px-4 pb-2 text-sm text-destructive" : "sr-only"
+        }
+      >
+        {pasteError}
+      </p>
+    </>
   )
 }
 

@@ -47,7 +47,6 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
             // Don't restore focus to the row being removed.
             event.preventDefault()
             deleteOnClose.current = false
-            onDeleteClick()
           }
         }}
       >
@@ -64,6 +63,7 @@ const InputContextMenu: FC<InputContextMenuProps> = ({
           className="cursor-pointer max-md:p-3"
           onSelect={() => {
             deleteOnClose.current = true
+            onDeleteClick()
           }}
         >
           <Trash />

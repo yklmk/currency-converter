@@ -25,6 +25,7 @@ import {
 interface CurrencySelectModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  onClose: () => void
   currencies: Currency[]
   setCurrency: (currency: Currency) => void
 }
@@ -35,12 +36,13 @@ const DESCRIPTION = "Choose the currency you want to use"
 export default function CurrencySelectModal({
   isOpen,
   onOpenChange,
+  onClose,
   currencies,
   setCurrency,
 }: CurrencySelectModalProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
 
-  const sortedCurrencies = currencies.sort((a, b) => {
+  const sortedCurrencies = [...currencies].sort((a, b) => {
     if (a.currencyName < b.currencyName) {
       return -1
     }
@@ -50,10 +52,18 @@ export default function CurrencySelectModal({
     return 0
   })
 
+  const handleCloseAutoFocus = (event: Event) => {
+    event.preventDefault()
+    onClose()
+  }
+
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent showCloseButton={false}>
+        <DialogContent
+          showCloseButton={false}
+          onCloseAutoFocus={handleCloseAutoFocus}
+        >
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
             <DialogDescription>{DESCRIPTION}</DialogDescription>
@@ -77,7 +87,7 @@ export default function CurrencySelectModal({
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
-      <DrawerContent>
+      <DrawerContent onCloseAutoFocus={handleCloseAutoFocus}>
         <DrawerHeader>
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
