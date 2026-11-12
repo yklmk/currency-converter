@@ -36,13 +36,13 @@ export function RatesStatus({ updatedAt, error }: RatesStatusProps) {
     // The live region stays mounted, so screen readers announce every change.
     <div
       role="status"
-      className="mb-px flex h-4 min-w-0 flex-1 items-center justify-end gap-2 text-xs/4 font-medium whitespace-nowrap text-muted-foreground"
+      className="mb-px flex h-4 min-w-0 flex-1 items-center justify-end text-xs/4 font-medium whitespace-nowrap text-muted-foreground"
     >
       {isShown && (
-        <>
+        <span className="flex items-center gap-2 transition-opacity duration-(--duration-enter) ease-(--ease-out-quad) starting:opacity-0">
           <TriangleExclamationPoint className="size-3.5 shrink-0 text-error" />
           Rates from {formatUpdatedAt(updatedAt)}
-        </>
+        </span>
       )}
     </div>
   )
