@@ -11,7 +11,7 @@ import { Currency } from "@/types/currency"
 import { cn } from "@/lib/utils"
 import { Flag } from "@/components/ui/flag"
 
-const TYPEAHEAD_RESET_MS = 500
+const TYPEAHEAD_RESET_MS = 800
 
 interface CurrenciesListProps {
   currencies: Currency[]
@@ -58,7 +58,10 @@ export default function CurrenciesList({
 }: CurrenciesListProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
-  const typeahead = useRef({ query: "", timeout: 0 })
+  const typeahead = useRef<{ query: string; lastTypedAt: number }>({
+    query: "",
+    lastTypedAt: 0,
+  })
 
   useEffect(() => {
     if (selectedIndex !== null && itemRefs.current[selectedIndex]) {
@@ -66,32 +69,35 @@ export default function CurrenciesList({
     }
   }, [selectedIndex])
 
-  useEffect(() => () => window.clearTimeout(typeahead.current.timeout), [])
-
   const jumpTo = (key: string) => {
     const state = typeahead.current
-    window.clearTimeout(state.timeout)
-    state.query += key.toLowerCase()
-    state.timeout = window.setTimeout(() => {
-      state.query = ""
-    }, TYPEAHEAD_RESET_MS)
+    const now = performance.now()
 
+    if (now - state.lastTypedAt > TYPEAHEAD_RESET_MS) {
+      state.query = ""
+    }
+
+    state.query += key.toLowerCase()
+    state.lastTypedAt = now
+
+    // Repeating one letter cycles through matches instead of searching "aaa".
     const isRepeat = [...state.query].every((char) => char === state.query[0])
     const query = isRepeat ? state.query[0] : state.query
     const start = isRepeat ? (selectedIndex ?? -1) + 1 : 0
-    const ordered = [
-      ...currencies.slice(start).map((currency, i) => [currency, start + i]),
-      ...currencies.slice(0, start).map((currency, i) => [currency, i]),
-    ] as [Currency, number][]
 
-    const match = ordered.find(
-      ([currency]) =>
-        currency.currencyName.toLowerCase().startsWith(query) ||
+    for (let offset = 0; offset < currencies.length; offset++) {
+      const index = (start + offset) % currencies.length
+      const currency = currencies[index]
+      if (
+        currency.currencyName
+          .toLowerCase()
+          .split(/\s+/)
+          .some((word) => word.startsWith(query)) ||
         currency.currencyCode.toLowerCase().startsWith(query)
-    )
-
-    if (match) {
-      setSelectedIndex(match[1])
+      ) {
+        setSelectedIndex(index)
+        return
+      }
     }
   }
 
