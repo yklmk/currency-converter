@@ -1,30 +1,75 @@
 import {
   ChangeEventHandler,
   ClipboardEventHandler,
-  FC,
   InputHTMLAttributes,
-  KeyboardEventHandler,
   MouseEventHandler,
+  ReactElement,
+  RefObject,
   useId,
-  useRef,
   useState,
 } from "react"
-import Bowser from "bowser"
 
 import { Currency } from "@/types/currency"
 import { normalizePastedAmount } from "@/lib/normalize-pasted-amount"
+import { cn } from "@/lib/utils"
 import { Flag } from "@/components/ui/flag"
 import { Input } from "@/components/ui/input"
 
-let isMacCache: boolean | undefined
+function CurrencyIdentity({
+  currency,
+  hasTrailingControl = false,
+}: {
+  currency: Currency
+  hasTrailingControl?: boolean
+}): ReactElement {
+  return (
+    // The name uses the space left by the amount; edit controls reserve 40px inside it.
+    <span className="relative h-8 min-w-0 flex-1 contain-layout">
+      <span
+        className={cn(
+          "absolute inset-y-0 left-0 flex w-full items-center transition-[width] duration-(--duration-enter) ease-(--ease-out-quad) motion-reduce:transition-none",
+          hasTrailingControl && "w-[calc(100%-2.5rem)]"
+        )}
+      >
+        <Flag countryCode={currency.countryCode} size={32} />
+        <span className="ml-3 flex min-w-0 flex-col justify-center">
+          <span className="truncate pb-1 text-base leading-3">
+            {currency.currencyName}
+          </span>
+          <span className="text-sm leading-3 text-ring">
+            {currency.currencyCode}
+          </span>
+        </span>
+      </span>
+    </span>
+  )
+}
 
-function isMac() {
-  if (isMacCache === undefined) {
-    isMacCache =
-      Bowser.getParser(window.navigator.userAgent).getOSName() === "macOS"
-  }
-
-  return isMacCache
+function CurrencyDisplay({
+  currency,
+  value,
+  hasTrailingControl = false,
+}: {
+  currency: Currency
+  value: string
+  hasTrailingControl?: boolean
+}): ReactElement {
+  return (
+    <span className="flex w-full items-center justify-between gap-3 p-4 text-left">
+      <CurrencyIdentity
+        currency={currency}
+        hasTrailingControl={hasTrailingControl}
+      />
+      <span
+        className={cn(
+          "max-w-[40%] min-w-3 shrink-0 truncate text-right text-base tabular-nums",
+          hasTrailingControl && "transform-[translateX(-2.5rem)]"
+        )}
+      >
+        {value || "0"}
+      </span>
+    </span>
+  )
 }
 
 interface CurrencyInputProps extends Omit<
@@ -32,20 +77,22 @@ interface CurrencyInputProps extends Omit<
   "onChange" | "onPaste"
 > {
   onValueChange: (value: string) => void
+  inputRef: RefObject<HTMLInputElement | null>
   currency: Currency
-  onRemoveShortcut?: (currency: Currency) => void
+  hasTrailingControl?: boolean
 }
 
-const CurrencyInput: FC<CurrencyInputProps> = ({
+function CurrencyInput({
   currency,
+  inputRef,
   value,
   onValueChange,
-  onRemoveShortcut,
+  hasTrailingControl = false,
   ...props
-}) => {
-  const inputRef = useRef<HTMLInputElement>(null)
+}: CurrencyInputProps): ReactElement {
   const [pasteError, setPasteError] = useState<string | null>(null)
   const pasteErrorId = useId()
+  const amountText = String(value ?? "") || props.placeholder || "0"
 
   // A click on the field itself keeps the browser's caret. A click elsewhere
   // on the card focuses the field with the caret at the end, where a label
@@ -53,7 +100,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   const handleCardClick: MouseEventHandler<HTMLLabelElement> = (event) => {
     const input = inputRef.current
 
-    if (!input || event.target === input) {
+    if (!input || input.disabled || event.target === input) {
       return
     }
 
@@ -65,8 +112,7 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
   }
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    let newValue = event.target.value
-    newValue = newValue.replace(",", ".")
+    const newValue = event.target.value.replace(",", ".")
 
     if (newValue === "" || /^\d+\.?\d*$/.test(newValue)) {
       setPasteError(null)
@@ -112,66 +158,55 @@ const CurrencyInput: FC<CurrencyInputProps> = ({
     onValueChange(nextValue)
   }
 
-  const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
-    if (!onRemoveShortcut || event.key !== "Backspace" || !event.shiftKey) {
-      return
-    }
-
-    const modifier = isMac() ? event.metaKey : event.ctrlKey
-
-    if (modifier) {
-      event.preventDefault()
-      onRemoveShortcut(currency)
-    }
-  }
-
   return (
     <>
       <label
         onClick={handleCardClick}
-        className="flex w-full cursor-pointer items-center justify-between bg-background p-4 select-none"
+        className="flex w-full cursor-[inherit] items-center justify-between gap-3 bg-background p-4 select-none"
       >
-        <div className="mr-1 flex shrink-0">
-          <Flag countryCode={currency.countryCode} size={32} />
-          <div className="ml-3 flex flex-col justify-center">
-            <span className="pb-1 text-base leading-3 text-nowrap">
-              {currency.currencyName}
-            </span>
-            <span className="text-sm leading-3 text-ring">
-              {currency.currencyCode}
-            </span>
-          </div>
-        </div>
-
-        <Input
-          ref={inputRef}
-          value={value}
-          className="size-auto max-w-[40%] min-w-3 shrink border-none bg-transparent p-0 text-right text-base text-ellipsis tabular-nums focus-visible:ring-0 disabled:bg-transparent md:text-base dark:bg-transparent dark:disabled:bg-transparent"
-          name={currency.currencyCode}
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0"
-          aria-label={`${currency.currencyCode} currency input`}
-          aria-describedby={pasteErrorId}
-          onPaste={handlePaste}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          {...props}
+        <CurrencyIdentity
+          currency={currency}
+          hasTrailingControl={hasTrailingControl}
         />
+
+        <span
+          // Translate the whole field so the caret and its sizing text stay aligned.
+          // will-change keeps its layer alive: iOS Safari stutters when it has to
+          // create one as the slide starts.
+          className={cn(
+            "relative max-w-[40%] min-w-3 shrink-0 transform-[translateX(0)] transition-transform duration-(--duration-enter) ease-(--ease-out-quad) will-change-transform motion-reduce:transition-none",
+            hasTrailingControl && "transform-[translateX(-2.5rem)]"
+          )}
+        >
+          {/* Size to the exact text width without measuring or reserving an input column. */}
+          <span
+            aria-hidden="true"
+            skullet-ignore=""
+            className="invisible block truncate text-base whitespace-pre tabular-nums"
+          >
+            {amountText}
+          </span>
+          <Input
+            ref={inputRef}
+            value={value}
+            className="absolute inset-0 size-full min-w-0 cursor-text border-none bg-transparent p-0 text-right text-base text-ellipsis tabular-nums select-text [-webkit-user-select:text] focus:[-webkit-touch-callout:default] focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100 md:text-base dark:bg-transparent dark:disabled:bg-transparent"
+            name={currency.currencyCode}
+            inputMode="decimal"
+            autoComplete="off"
+            placeholder="0"
+            aria-label={`${currency.currencyCode} currency input`}
+            aria-describedby={pasteErrorId}
+            onPaste={handlePaste}
+            onChange={handleChange}
+            {...props}
+          />
+        </span>
       </label>
-      <p
-        id={pasteErrorId}
-        role="status"
-        className={
-          pasteError ? "px-4 pb-2 text-sm text-destructive" : "sr-only"
-        }
-      >
+      <p id={pasteErrorId} role="status" className="sr-only">
         {pasteError}
       </p>
     </>
   )
 }
 
-CurrencyInput.displayName = "CurrencyInput"
-
-export { CurrencyInput, type CurrencyInputProps }
+export { CurrencyInput, CurrencyDisplay, type CurrencyInputProps }

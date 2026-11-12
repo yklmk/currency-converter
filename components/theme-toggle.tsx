@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { ReactElement, useEffect } from "react"
 import { Moon, SunMedium } from "lucide-react"
 import { AnimatePresence, motion, type Transition } from "motion/react"
 import { useTheme } from "next-themes"
@@ -21,7 +21,11 @@ const iconMotion = {
 // Two states over a three-state model: the button flips to the opposite of
 // what is shown. When that matches the OS, the override is dropped and the
 // theme follows the system again; otherwise the choice is pinned.
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string
+}
+
+export function ThemeToggle({ className }: ThemeToggleProps): ReactElement {
   const { resolvedTheme, systemTheme, setTheme } = useTheme()
   const isClient = useIsClient()
 
@@ -49,6 +53,7 @@ export function ThemeToggle() {
     <Button
       size="icon"
       variant="outline"
+      className={className}
       aria-label={isClient ? `Switch to ${target} theme` : "Toggle theme"}
       onClick={onToggle}
     >
