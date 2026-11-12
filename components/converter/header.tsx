@@ -1,5 +1,3 @@
-"use client"
-
 import { ReactElement, RefObject, useLayoutEffect } from "react"
 import { Check, Pencil, Plus } from "lucide-react"
 import { useSpring } from "motion/react"
