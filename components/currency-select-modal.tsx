@@ -113,7 +113,9 @@ export default function CurrencySelectModal({
 
         <DrawerFooter className="pb-[max(--spacing(10),env(safe-area-inset-bottom))]">
           <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button size="lg" variant="outline">
+              Cancel
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
