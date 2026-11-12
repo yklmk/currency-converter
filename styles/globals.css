@@ -55,6 +55,7 @@
     /* A gentler ease-out keeps more of short fades visible when Safari's
        first painted frame arrives after the transition has already started. */
     --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-vaul: cubic-bezier(0.32, 0.72, 0, 1);
 
     --duration-enter: 200ms;
     --duration-exit: 120ms;
