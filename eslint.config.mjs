@@ -29,6 +29,7 @@ const config = [
       },
     },
     rules: {
+      "no-nested-ternary": "error",
       "prettier/prettier": "warn",
     },
   },

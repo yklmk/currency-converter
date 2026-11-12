@@ -1,21 +1,18 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { ReactElement, useMemo, useRef, useState } from "react"
 import supportedCurrencies from "@/helpers/currencies"
-import { Check, Plus, SettingsIcon } from "lucide-react"
-import { AnimatePresence, Reorder } from "motion/react"
-import { Skeleton } from "skullet/react"
-import { useIsClient, useLocalStorage } from "usehooks-ts"
+import { useIsClient, useLocalStorage, useMediaQuery } from "usehooks-ts"
 
-import { Currency, CurrencyCode, Rate } from "@/types/currency"
+import { Currency, Rate } from "@/types/currency"
+import { convertAmounts, CurrencyAmount } from "@/lib/convert"
 import { useRates } from "@/hooks/use-rates"
-import { Button } from "@/components/ui/button"
-import { InputContextMenu } from "@/components/converter/input"
 import CurrencySelectModal from "@/components/currency-select-modal"
-import SettingsModal from "@/components/settings-modal"
 
+import { DEFAULT_CURRENCIES, MIN_CURRENCIES } from "./constants"
 import Container from "./container"
-import { Input } from "./input"
+import { CurrencyList } from "./currency-list"
+import { ConverterHeader } from "./header"
 import { RatesStatus } from "./rates-status"
 
 interface ConverterProps {
@@ -23,59 +20,10 @@ interface ConverterProps {
   updatedAt: string
 }
 
-const defaultCurrencies: Currency[] = [
-  {
-    currencyCode: "USD",
-    currencyName: "US Dollar",
-    countryCode: "US",
-  },
-  {
-    currencyCode: "EUR",
-    currencyName: "Euro",
-    countryCode: "EU",
-  },
-  {
-    currencyCode: "GBP",
-    currencyName: "British Pound",
-    countryCode: "GB",
-  },
-]
-
-const MAX_LENGTH = 10
-
-type LastInput = {
-  currencyCode: CurrencyCode
-  value: string
-}
-
-const convert = (rates: Rate, { currencyCode, value }: LastInput): Rate => {
-  const convertedCurrencies = Object.keys(rates)
-    .filter((key) => key !== currencyCode)
-    .reduce((acc, key) => {
-      const convertedValue =
-        (Number(value) / rates[currencyCode]) * rates[key as keyof Rate]
-
-      const formattedValue = convertedValue.toFixed(2).toString()
-
-      let trimmedValue =
-        formattedValue.length > MAX_LENGTH
-          ? formattedValue.slice(0, MAX_LENGTH)
-          : formattedValue
-
-      if (trimmedValue.endsWith(".")) {
-        trimmedValue = trimmedValue.slice(0, -1)
-      }
-
-      return { ...acc, [key]: trimmedValue }
-    }, {} as Rate)
-
-  return { ...convertedCurrencies, [currencyCode]: value ? value : "" }
-}
-
 export default function Converter({
   rates: serverRates,
   updatedAt,
-}: ConverterProps) {
+}: ConverterProps): ReactElement {
   const isClient = useIsClient()
   const serverSnapshot = useMemo(
     () => ({ rates: serverRates, updatedAt }),
@@ -87,208 +35,110 @@ export default function Converter({
     error: ratesError,
   } = useRates(serverSnapshot)
 
-  const [state, setState] = useState<Rate>({} as Rate)
+  const [lastInput, setLastInput] = useState<CurrencyAmount | null>(null)
+  const amounts = convertAmounts(rates, lastInput)
   const [currencies, setCurrencies] = useLocalStorage<Currency[]>(
     "currencies",
-    defaultCurrencies
+    DEFAULT_CURRENCIES
   )
-  const [draggedCurrency, setDraggedCurrency] = useState<CurrencyCode | null>(
-    null
-  )
-  const [isCurrenciesListOpen, setIsCurrenciesListOpen] = useState(false)
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
-  const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
-
-  const listRef = useRef<HTMLDivElement>(null)
+  const [isCurrenciesListOpen, setIsCurrenciesListOpen] =
+    useState<boolean>(false)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [isListRevealed, setIsListRevealed] = useState<boolean>(false)
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const settingsButtonRef = useRef<HTMLButtonElement | null>(null)
-  const lastInputRef = useRef<LastInput | null>(null)
-
-  const availableCurrencies = supportedCurrencies.filter((currency) => {
-    return !currencies.some(
-      (item) => item.currencyCode === currency.currencyCode
-    )
-  })
-
-  // When rates are refreshed in the background, recalculate from the last
-  // entered value instead of resetting the inputs.
-  useEffect(() => {
-    setState(
-      lastInputRef.current ? convert(rates, lastInputRef.current) : rates
-    )
-  }, [rates])
-
-  const convertCurrencies = (currencyCode: CurrencyCode, value: string) => {
-    lastInputRef.current = { currencyCode, value }
-    setState(convert(rates, lastInputRef.current))
-  }
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  const selectedCodes = new Set(
+    currencies.map(({ currencyCode }) => currencyCode)
+  )
+  const availableCurrencies = supportedCurrencies.filter(
+    ({ currencyCode }) => !selectedCodes.has(currencyCode)
+  )
 
   const onSelectCurrency = (currency: Currency) => {
+    setCurrencies((prev) =>
+      prev.some((item) => item.currencyCode === currency.currencyCode)
+        ? prev
+        : [...prev, currency]
+    )
     setIsCurrenciesListOpen(false)
-    setTimeout(() => setCurrencies((prev) => [...prev, currency]), 200)
-    setTimeout(() => addButtonRef.current?.focus(), 100)
   }
 
-  const onOpenCurrenciesList = () => setIsCurrenciesListOpen(true)
-  const onOpenSettingsModal = () => setIsSettingsModalOpen(true)
-  const onEnableEditMode = () => setIsEditModeEnabled(true)
-  const onDisableEditMode = () => setIsEditModeEnabled(false)
+  const onCurrencySelectModalClose = () => {
+    addButtonRef.current?.focus()
+  }
 
   const onRemoveCurrency = (currency: Currency) => {
-    if (currencies.length > 2) {
-      setCurrencies((prev) =>
-        prev.filter((item) => item.currencyCode !== currency.currencyCode)
-      )
-    }
+    setCurrencies((prev) =>
+      prev.length > MIN_CURRENCIES
+        ? prev.filter((item) => item.currencyCode !== currency.currencyCode)
+        : prev
+    )
   }
 
-  const setIsDragged = (currencyCode: CurrencyCode, value: boolean) => {
-    if (value) {
-      if (currencies.length > 2) {
-        setDraggedCurrency(currencyCode)
-      }
-    } else {
-      setDraggedCurrency((prev) => (prev === currencyCode ? null : prev))
-    }
-  }
-
-  const onCurrencySelectModalOpenChange = (open: boolean) => {
-    if (!open) {
-      setTimeout(() => {
-        addButtonRef.current?.focus()
-      }, 100)
-    }
-
-    setIsCurrenciesListOpen(open)
-  }
-
-  const onSettingsModalOpenChange = (open: boolean) => {
-    if (!open) {
-      setTimeout(() => {
-        settingsButtonRef.current?.focus()
-      }, 100)
-    }
-
-    setIsSettingsModalOpen(open)
+  function onReorderCurrencies(
+    order: Currency[],
+    startOrder: Currency[]
+  ): void {
+    setCurrencies((current) => {
+      // useLocalStorage reads the latest stored value, including unrendered tab updates.
+      const sourceUnchanged =
+        current.length === startOrder.length &&
+        current.every((currency, index) => {
+          const original = startOrder[index]
+          return (
+            currency.currencyCode === original.currencyCode &&
+            currency.currencyName === original.currencyName &&
+            currency.countryCode === original.countryCode
+          )
+        })
+      return sourceUnchanged ? order : current
+    })
   }
 
   return (
     <>
-      <Container>
-        <div className="flex items-center justify-between border-b p-4">
-          <div className="flex">
-            <Button
-              ref={settingsButtonRef}
-              size="icon"
-              variant="outline"
-              className="size-8"
-              aria-label="Settings"
-              onClick={onOpenSettingsModal}
-            >
-              <SettingsIcon size={20} />
-            </Button>
-          </div>
-          {isEditModeEnabled ? (
-            <Button
-              variant="outline"
-              className="h-8 px-2"
-              aria-label="Done"
-              onClick={onDisableEditMode}
-            >
-              <Check size={18} className="mr-1" />
-              Done
-            </Button>
-          ) : (
-            <Button
-              ref={addButtonRef}
-              variant="outline"
-              className="h-8 px-2"
-              disabled={availableCurrencies.length === 0}
-              aria-label="Add currency"
-              onClick={onOpenCurrenciesList}
-            >
-              <Plus size={18} className="mr-1" />
-              Add
-            </Button>
-          )}
-        </div>
+      {/* Until the stored list has replaced its skeleton the card snaps to it,
+          so rows never sit outside a card that is still catching up. */}
+      <Container animateHeight={isListRevealed && !reducedMotion}>
+        <ConverterHeader
+          isEditing={isEditing}
+          reducedMotion={reducedMotion}
+          canAddCurrency={availableCurrencies.length > 0}
+          addButtonRef={addButtonRef}
+          onToggleEditing={() => setIsEditing((previous) => !previous)}
+          onAddCurrency={() => setIsCurrenciesListOpen(true)}
+        />
 
-        <div className="flex flex-col px-3 pt-4 pb-10 sm:mx-auto sm:w-[70%]">
-          <div className="flex items-end justify-between gap-3 px-1 pb-2">
-            <h2 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
+        <div className="flex flex-col px-4 pt-4 pb-14 sm:mx-auto sm:w-[70%]">
+          <div className="flex items-end justify-between gap-3 pb-3">
+            <h1 className="shrink-0 text-3xl leading-none font-bold tracking-tighter">
               Converter
-            </h2>
+            </h1>
 
             {isClient && (
               <RatesStatus updatedAt={ratesUpdatedAt} error={ratesError} />
             )}
           </div>
 
-          <div ref={listRef}>
-            <Skeleton
-              id="currencies"
-              label="Loading currencies"
-              // The server can't read localStorage, so until the page is
-              // hydrated the list is a skeleton drawn from the defaults.
-              data={isClient ? currencies : null}
-              sample={defaultCurrencies}
-            >
-              {(list) => (
-                <Reorder.Group
-                  layoutScroll
-                  axis="y"
-                  values={list}
-                  className="relative flex flex-col"
-                  role="list"
-                  onReorder={setCurrencies}
-                >
-                  <AnimatePresence initial={false} mode="sync">
-                    {list.map((currency) => (
-                      <InputContextMenu
-                        key={currency.currencyCode}
-                        disabled={isEditModeEnabled}
-                        isDeleteDisabled={list.length <= 2}
-                        onEditModeClick={onEnableEditMode}
-                        onDeleteClick={() => onRemoveCurrency(currency)}
-                      >
-                        <Input
-                          showControls={isEditModeEnabled}
-                          currency={currency}
-                          value={state[currency.currencyCode] || ""}
-                          maxLength={MAX_LENGTH}
-                          dragConstraints={listRef}
-                          draggable={list.length > 2}
-                          isDragged={currency.currencyCode === draggedCurrency}
-                          setIsDragged={setIsDragged}
-                          onChange={(event) =>
-                            convertCurrencies(
-                              currency.currencyCode,
-                              event.target.value
-                            )
-                          }
-                          onRemove={onRemoveCurrency}
-                          onRemoveShortcut={onRemoveCurrency}
-                        />
-                      </InputContextMenu>
-                    ))}
-                  </AnimatePresence>
-                </Reorder.Group>
-              )}
-            </Skeleton>
-          </div>
+          <CurrencyList
+            currencies={currencies}
+            amounts={amounts}
+            isLoading={!isClient}
+            isEditing={isEditing}
+            onReorder={onReorderCurrencies}
+            onRemove={onRemoveCurrency}
+            onValueChange={setLastInput}
+            onReveal={() => setIsListRevealed(true)}
+          />
         </div>
       </Container>
 
       <CurrencySelectModal
         isOpen={isCurrenciesListOpen}
-        onOpenChange={onCurrencySelectModalOpenChange}
+        onOpenChange={setIsCurrenciesListOpen}
+        onClose={onCurrencySelectModalClose}
         currencies={availableCurrencies}
         setCurrency={onSelectCurrency}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onOpenChange={onSettingsModalOpenChange}
       />
     </>
   )

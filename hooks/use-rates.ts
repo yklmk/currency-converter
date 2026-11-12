@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import supportedCurrencies from "@/helpers/currencies"
 import useSWR, { useSWRConfig } from "swr"
 
 import { Rate } from "@/types/currency"
 
-export type RatesSnapshot = {
+type RatesSnapshot = {
   rates: Rate
   updatedAt: string
 }
@@ -22,7 +23,14 @@ const RETRY_INTERVAL = 3 * 1000
 const RETRY_COUNT = 3
 
 const isValid = (snapshot?: RatesSnapshot): snapshot is RatesSnapshot =>
-  Boolean(snapshot?.rates && snapshot.updatedAt)
+  Boolean(
+    snapshot?.rates &&
+    snapshot.updatedAt &&
+    supportedCurrencies.every(({ currencyCode }) => {
+      const rate = snapshot.rates[currencyCode]
+      return typeof rate === "number" && Number.isFinite(rate) && rate > 0
+    })
+  )
 
 const isNewer = (a: RatesSnapshot, b?: RatesSnapshot) =>
   !isValid(b) || Date.parse(a.updatedAt) > Date.parse(b.updatedAt)
@@ -64,7 +72,7 @@ export function useRates(initial: RatesSnapshot): RatesSnapshot & {
 } {
   const { cache } = useSWRConfig()
   // SWR keeps the error while it retries, this tells when it gave up.
-  const [hasGivenUp, setHasGivenUp] = useState(false)
+  const [hasGivenUp, setHasGivenUp] = useState<boolean>(false)
   const { data, error, mutate } = useSWR(RATES_KEY, fetcher, {
     fallbackData: initial,
     dedupingInterval: REFRESH_INTERVAL,
@@ -81,6 +89,7 @@ export function useRates(initial: RatesSnapshot): RatesSnapshot & {
     onSuccess: () => setHasGivenUp(false),
   })
 
+  // Old caches may contain rounded strings; replace them with numeric rates.
   // The server-rendered rates can be newer than the persisted ones, e.g. after
   // a deploy or when the cache is empty.
   useEffect(() => {

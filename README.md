@@ -1,22 +1,12 @@
-# next-template
+# Currency Converter
 
-A Next.js 13 template for building apps with Radix UI and Tailwind CSS.
-
-## Usage
-
-```bash
-npx create-next-app -e https://github.com/shadcn/next-template
-```
+A simple currency converter for comparing multiple currencies at once.
 
 ## Features
 
-- Next.js 13 App Directory
-- Radix UI Primitives
-- Tailwind CSS
-- Icons from [Lucide](https://lucide.dev)
-- Dark mode with `next-themes`
-- Tailwind CSS class sorting, merging and linting.
-
-## License
-
-Licensed under the [MIT license](https://github.com/shadcn/ui/blob/main/LICENSE.md).
+- Convert amounts between currencies as you type.
+- Add, remove, and reorder currencies.
+- Search currencies by name or code.
+- Offline mode with saved exchange rates.
+- Touch gesture support for swipe-to-delete and drag-to-reorder.
+- Keyboard support for navigation, currency selection, reordering, and removal.

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 // Country code to a data URL of its circle flag.
 const flags: Record<string, string> = flagsJson
 
-export interface FlagProps {
+interface FlagProps {
   countryCode?: string
   size?: number
   className?: string
@@ -24,7 +24,7 @@ export function Flag({ countryCode, size = 22, className }: FlagProps) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt={countryCode}
+          alt=""
           width={size}
           height={size}
           className="rounded-full border"

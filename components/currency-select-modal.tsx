@@ -1,3 +1,4 @@
+import { ReactElement } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { Currency } from "@/types/currency"
@@ -25,22 +26,26 @@ import {
 interface CurrencySelectModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  onClose: () => void
   currencies: Currency[]
   setCurrency: (currency: Currency) => void
 }
 
-const TITLE = "Select currency"
+const TITLE = "Select Currency"
 const DESCRIPTION = "Choose the currency you want to use"
 
 export default function CurrencySelectModal({
   isOpen,
   onOpenChange,
+  onClose,
   currencies,
   setCurrency,
-}: CurrencySelectModalProps) {
+}: CurrencySelectModalProps): ReactElement {
   const isDesktop = useMediaQuery("(min-width: 768px)")
+  // Vaul uses CSS motion, so MotionConfig alone cannot disable its movement.
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
 
-  const sortedCurrencies = currencies.sort((a, b) => {
+  const sortedCurrencies = [...currencies].sort((a, b) => {
     if (a.currencyName < b.currencyName) {
       return -1
     }
@@ -50,10 +55,18 @@ export default function CurrencySelectModal({
     return 0
   })
 
+  const handleCloseAutoFocus = (event: Event) => {
+    event.preventDefault()
+    onClose()
+  }
+
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogContent
+          showCloseButton={false}
+          onCloseAutoFocus={handleCloseAutoFocus}
+        >
           <DialogHeader>
             <DialogTitle>{TITLE}</DialogTitle>
             <DialogDescription>{DESCRIPTION}</DialogDescription>
@@ -67,9 +80,7 @@ export default function CurrencySelectModal({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button aria-label="Cancel" variant="outline">
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -77,10 +88,19 @@ export default function CurrencySelectModal({
     )
   }
 
+  // Keep Safari's page/safe-area background unchanged during drawer scaling.
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
-      <DrawerContent>
-        <DrawerHeader className="text-start">
+    <Drawer
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      shouldScaleBackground={!reducedMotion}
+      setBackgroundColorOnScale={false}
+    >
+      <DrawerContent
+        className="motion-reduce:animate-none! motion-reduce:transition-none!"
+        onCloseAutoFocus={handleCloseAutoFocus}
+      >
+        <DrawerHeader>
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
         </DrawerHeader>
@@ -91,9 +111,11 @@ export default function CurrencySelectModal({
           onSelectCurrency={setCurrency}
         />
 
-        <DrawerFooter className="pb-10">
+        <DrawerFooter className="pb-[max(--spacing(10),env(safe-area-inset-bottom))]">
           <DrawerClose asChild>
-            <Button aria-label="Cancel">Cancel</Button>
+            <Button size="lg" variant="outline">
+              Cancel
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

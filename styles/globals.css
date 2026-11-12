@@ -1,123 +1,115 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "shadow-plugin";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+@theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+@theme {
+  --color-steel-25: oklch(99.25% 0 0);
+  --color-steel-50: oklch(98.45% 0.0015 247.858);
+  --color-steel-100: oklch(96.75% 0.003904 252.467);
+  --color-steel-200: oklch(92.45% 0.008281 262.614);
+  --color-steel-300: oklch(87% 0.013605 259.864);
+  --color-steel-400: oklch(70.45% 0.026794 264.656);
+  --color-steel-500: oklch(55.3% 0.030271 264.666);
+  --color-steel-600: oklch(44.4% 0.029252 265.252);
+  --color-steel-700: oklch(37.1% 0.027885 263.677);
+  --color-steel-800: oklch(27.65% 0.023234 263.276);
+  --color-steel-900: oklch(20.9% 0.023839 268.237);
+  --color-steel-950: oklch(13.5% 0.023349 266.907);
 
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-zinc-750: oklch(33% 0.006 286);
+  --color-zinc-850: oklch(23.5% 0.006 286);
 
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-background: var(--color-steel-25);
+  --color-foreground: var(--color-steel-950);
 
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-popover: var(--color-steel-25);
+  --color-popover-foreground: var(--color-steel-950);
 
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-primary: var(--color-steel-900);
+  --color-primary-foreground: var(--color-steel-50);
 
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-secondary: var(--color-steel-100);
+  --color-secondary-foreground: var(--color-steel-900);
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  --color-muted: var(--color-steel-100);
+  --color-muted-foreground: var(--color-steel-600);
 
-  --color-kbd: hsl(var(--kbd));
+  --color-accent: var(--color-steel-100);
 
-  --color-error: var(--color-red-400);
+  --color-destructive: var(--color-red-600);
+
+  --color-border: var(--color-steel-200);
+  --color-input: var(--color-steel-200);
+  --color-ring: var(--color-steel-400);
+
+  --color-error: var(--color-red-600);
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --radius: 0.625rem;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    /* A gentler ease-out keeps more of short fades visible when Safari's
+       first painted frame arrives after the transition has already started. */
+    --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-vaul: cubic-bezier(0.32, 0.72, 0, 1);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --duration-enter: 200ms;
+    --duration-exit: 120ms;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 72.22% 50.59%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-
-    --input: 240 5.9% 90%;
-
-    --ring: 240 5% 64.9%;
-
-    --kbd: 0 0% 88%;
-
-    --skullet-base: rgb(0 0 0 / 0.07);
-    --skullet-highlight: rgb(255 255 255 / 0.6);
+    --skullet-base: color-mix(
+      in oklab,
+      var(--color-border) 70%,
+      var(--color-background)
+    );
+    --skullet-highlight: var(--color-background);
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
+    --color-background: var(--color-zinc-850);
+    --color-foreground: var(--color-zinc-50);
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --color-popover: var(--color-zinc-850);
+    --color-popover-foreground: var(--color-zinc-50);
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --color-primary: var(--color-zinc-50);
+    --color-primary-foreground: var(--color-zinc-900);
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --color-secondary: var(--color-zinc-800);
+    --color-secondary-foreground: var(--color-zinc-50);
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --color-muted: var(--color-zinc-900);
+    --color-muted-foreground: var(--color-zinc-400);
 
-    --muted: 0 0% 11%;
-    --muted-foreground: 240 5% 64.9%;
+    --color-accent: var(--color-zinc-800);
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --color-destructive: var(--color-red-400);
+    --color-error: var(--color-red-400);
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
+    --color-border: var(--color-zinc-750);
+    --color-input: var(--color-zinc-750);
+    --color-ring: var(--color-zinc-300);
 
-    --border: 240 3.7% 15.9%;
-
-    --input: 240 3.7% 15.9%;
-
-    --ring: 240 4.9% 83.9%;
-
-    --kbd: 0 0% 32%;
-
-    --skullet-base: rgb(255 255 255 / 0.08);
-    --skullet-highlight: rgb(255 255 255 / 0.1);
+    --skullet-highlight: var(--color-border);
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
 
   button:not(:disabled),
@@ -132,14 +124,6 @@
       "calt" 1;
   }
 
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"] {
-    -webkit-appearance: none;
-    margin: 0;
-    -moz-appearance: textfield !important;
-  }
-
   /* skullet draws a skeleton's bars in a layer over the content it measures.
      The currency rows raise their surface with z-index, which would cover the
      bars, so the measured content gets its own stacking context. */
@@ -152,4 +136,5 @@
    input. Outside @layer, so it wins over the input's size-auto utility. */
 [skullet-ghost] input {
   width: 4ch;
+  border-radius: var(--radius-sm);
 }

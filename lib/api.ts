@@ -5,8 +5,8 @@ import ratesFixture from "@/lib/fixtures/rates.json"
 import { createLogger, highlight } from "@/lib/log"
 
 // How often the server refreshes rates from currencyapi, in seconds (6 hours).
-export const RATES_REVALIDATE = 21600
-export const RATES_TAG = "rates"
+const RATES_REVALIDATE = 21600
+const RATES_TAG = "rates"
 
 // Below this share of the monthly quota left, in percent, refreshes warn.
 const LOW_QUOTA = 20
@@ -18,10 +18,10 @@ const log = createLogger("rates")
 const useFixture =
   process.env.NODE_ENV === "development" || process.env.RATES_FIXTURE === "1"
 
-const normalizeRates = ({ data }: RatesResponse) =>
-  Object.values(data).reduce((acc, { code, value }) => {
-    return { ...acc, [code]: value.toFixed(2) }
-  }, {} as Rate)
+const normalizeRates = ({ data }: RatesResponse): Rate =>
+  Object.fromEntries(
+    Object.values(data).map(({ code, value }) => [code, value])
+  ) as Rate
 
 export const fetchRates = async (): Promise<RatesData> => {
   if (useFixture) {
