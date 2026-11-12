@@ -1,3 +1,4 @@
+import { ReactElement } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { Currency } from "@/types/currency"
@@ -39,8 +40,10 @@ export default function CurrencySelectModal({
   onClose,
   currencies,
   setCurrency,
-}: CurrencySelectModalProps) {
+}: CurrencySelectModalProps): ReactElement {
   const isDesktop = useMediaQuery("(min-width: 768px)")
+  // Vaul uses CSS motion, so MotionConfig alone cannot disable its movement.
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
 
   const sortedCurrencies = [...currencies].sort((a, b) => {
     if (a.currencyName < b.currencyName) {
@@ -85,9 +88,18 @@ export default function CurrencySelectModal({
     )
   }
 
+  // Keep Safari's page/safe-area background unchanged during drawer scaling.
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange} shouldScaleBackground>
-      <DrawerContent onCloseAutoFocus={handleCloseAutoFocus}>
+    <Drawer
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      shouldScaleBackground={!reducedMotion}
+      setBackgroundColorOnScale={false}
+    >
+      <DrawerContent
+        className="motion-reduce:animate-none! motion-reduce:transition-none!"
+        onCloseAutoFocus={handleCloseAutoFocus}
+      >
         <DrawerHeader>
           <DrawerTitle>{TITLE}</DrawerTitle>
           <DrawerDescription>{DESCRIPTION}</DrawerDescription>
