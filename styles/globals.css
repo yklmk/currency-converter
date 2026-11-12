@@ -19,33 +19,49 @@
 }
 
 @theme {
-  --color-background: var(--color-white);
-  --color-foreground: var(--color-slate-950);
+  --color-steel-25: oklch(99.25% 0 0);
+  --color-steel-50: oklch(98.45% 0.0015 247.858);
+  --color-steel-100: oklch(96.75% 0.003904 252.467);
+  --color-steel-200: oklch(92.45% 0.008281 262.614);
+  --color-steel-300: oklch(87% 0.013605 259.864);
+  --color-steel-400: oklch(70.45% 0.026794 264.656);
+  --color-steel-500: oklch(55.3% 0.030271 264.666);
+  --color-steel-600: oklch(44.4% 0.029252 265.252);
+  --color-steel-700: oklch(37.1% 0.027885 263.677);
+  --color-steel-800: oklch(27.65% 0.023234 263.276);
+  --color-steel-900: oklch(20.9% 0.023839 268.237);
+  --color-steel-950: oklch(13.5% 0.023349 266.907);
 
-  --color-popover: var(--color-white);
-  --color-popover-foreground: var(--color-slate-950);
+  --color-zinc-750: oklch(33% 0.006 286);
+  --color-zinc-850: oklch(23.5% 0.006 286);
 
-  --color-primary: var(--color-slate-900);
-  --color-primary-foreground: var(--color-slate-50);
+  --color-background: var(--color-steel-25);
+  --color-foreground: var(--color-steel-950);
 
-  --color-secondary: var(--color-slate-100);
-  --color-secondary-foreground: var(--color-slate-900);
+  --color-popover: var(--color-steel-25);
+  --color-popover-foreground: var(--color-steel-950);
 
-  --color-muted: var(--color-slate-100);
-  --color-muted-foreground: var(--color-slate-500);
+  --color-primary: var(--color-steel-900);
+  --color-primary-foreground: var(--color-steel-50);
 
-  --color-accent: var(--color-slate-100);
-  --color-accent-foreground: var(--color-slate-900);
+  --color-secondary: var(--color-steel-100);
+  --color-secondary-foreground: var(--color-steel-900);
+
+  --color-muted: var(--color-steel-100);
+  --color-muted-foreground: var(--color-steel-600);
+
+  --color-accent: var(--color-steel-100);
+  --color-accent-foreground: var(--color-steel-900);
 
   --color-destructive: var(--color-red-600);
 
-  --color-border: var(--color-slate-200);
-  --color-input: var(--color-slate-200);
-  --color-ring: var(--color-slate-400);
+  --color-border: var(--color-steel-200);
+  --color-input: var(--color-steel-200);
+  --color-ring: var(--color-steel-400);
 
-  --color-kbd: var(--color-slate-200);
+  --color-kbd: var(--color-steel-200);
 
-  --color-error: var(--color-red-400);
+  --color-error: var(--color-red-600);
 }
 
 @layer base {
@@ -60,39 +76,43 @@
     --duration-enter: 200ms;
     --duration-exit: 120ms;
 
-    --skullet-base: rgb(0 0 0 / 0.07);
-    --skullet-highlight: rgb(255 255 255 / 0.6);
+    --skullet-base: color-mix(
+      in oklab,
+      var(--color-border) 70%,
+      var(--color-background)
+    );
+    --skullet-highlight: var(--color-background);
   }
 
   .dark {
-    --color-background: var(--color-slate-950);
-    --color-foreground: var(--color-slate-50);
+    --color-background: var(--color-zinc-850);
+    --color-foreground: var(--color-zinc-50);
 
-    --color-popover: var(--color-slate-950);
-    --color-popover-foreground: var(--color-slate-50);
+    --color-popover: var(--color-zinc-850);
+    --color-popover-foreground: var(--color-zinc-50);
 
-    --color-primary: var(--color-slate-50);
-    --color-primary-foreground: var(--color-slate-900);
+    --color-primary: var(--color-zinc-50);
+    --color-primary-foreground: var(--color-zinc-900);
 
-    --color-secondary: var(--color-slate-800);
-    --color-secondary-foreground: var(--color-slate-50);
+    --color-secondary: var(--color-zinc-800);
+    --color-secondary-foreground: var(--color-zinc-50);
 
-    --color-muted: var(--color-slate-900);
-    --color-muted-foreground: var(--color-slate-400);
+    --color-muted: var(--color-zinc-900);
+    --color-muted-foreground: var(--color-zinc-400);
 
-    --color-accent: var(--color-slate-800);
-    --color-accent-foreground: var(--color-slate-50);
+    --color-accent: var(--color-zinc-800);
+    --color-accent-foreground: var(--color-zinc-50);
 
     --color-destructive: var(--color-red-400);
+    --color-error: var(--color-red-400);
 
-    --color-border: var(--color-slate-800);
-    --color-input: var(--color-slate-800);
-    --color-ring: var(--color-slate-300);
+    --color-border: var(--color-zinc-750);
+    --color-input: var(--color-zinc-750);
+    --color-ring: var(--color-zinc-300);
 
-    --color-kbd: var(--color-slate-600);
+    --color-kbd: var(--color-zinc-600);
 
-    --skullet-base: rgb(255 255 255 / 0.08);
-    --skullet-highlight: rgb(255 255 255 / 0.1);
+    --skullet-highlight: var(--color-border);
   }
 }
 

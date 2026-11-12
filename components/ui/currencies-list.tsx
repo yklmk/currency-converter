@@ -40,7 +40,7 @@ const CurrencyListItem = forwardRef<HTMLDivElement, CurrencyListItemProps>(
           <span className="mb-1 text-base leading-3">
             {currency.currencyName}
           </span>
-          <span className="text-sm leading-3 text-ring">
+          <span className="text-sm leading-3 text-muted-foreground">
             {currency.currencyCode}
           </span>
         </div>

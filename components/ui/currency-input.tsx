@@ -36,7 +36,7 @@ function CurrencyIdentity({
           <span className="truncate pb-1 text-base leading-3">
             {currency.currencyName}
           </span>
-          <span className="text-sm leading-3 text-ring">
+          <span className="text-sm leading-3 text-muted-foreground">
             {currency.currencyCode}
           </span>
         </span>
