@@ -113,7 +113,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <html lang="en" suppressHydrationWarning>
         <body
           className={cn(
-            "min-h-dvh bg-muted font-sans antialiased transition-colors duration-300",
+            "min-h-dvh bg-muted font-sans antialiased",
             geist.variable,
             geistMono.variable
           )}

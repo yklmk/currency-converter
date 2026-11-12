@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Currency Converter",
   shortName: "Converter",
   themeColor: {
-    light: "#f4f4f5",
-    dark: "#171717",
+    light: "#f1f5f9",
+    dark: "#0f172a",
   },
 }
