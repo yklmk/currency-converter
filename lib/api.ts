@@ -5,8 +5,8 @@ import ratesFixture from "@/lib/fixtures/rates.json"
 import { createLogger, highlight } from "@/lib/log"
 
 // How often the server refreshes rates from currencyapi, in seconds (6 hours).
-export const RATES_REVALIDATE = 21600
-export const RATES_TAG = "rates"
+const RATES_REVALIDATE = 21600
+const RATES_TAG = "rates"
 
 // Below this share of the monthly quota left, in percent, refreshes warn.
 const LOW_QUOTA = 20

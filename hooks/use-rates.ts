@@ -6,7 +6,7 @@ import useSWR, { useSWRConfig } from "swr"
 
 import { Rate } from "@/types/currency"
 
-export type RatesSnapshot = {
+type RatesSnapshot = {
   rates: Rate
   updatedAt: string
 }

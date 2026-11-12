@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 // Country code to a data URL of its circle flag.
 const flags: Record<string, string> = flagsJson
 
-export interface FlagProps {
+interface FlagProps {
   countryCode?: string
   size?: number
   className?: string
